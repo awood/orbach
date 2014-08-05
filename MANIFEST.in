@@ -1,0 +1,2 @@
+recursive-include orbach/templates *
+recursive-include orbach/static *
