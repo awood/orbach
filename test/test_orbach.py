@@ -1,0 +1,9 @@
+from flask import Flask
+from flask.ext.testing import TestCase
+
+
+class OrbachTest(TestCase):
+    def create_app(self):
+        app = Flask(__name__)
+        app.config['TESTING'] = True
+        return app
