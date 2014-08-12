@@ -15,7 +15,10 @@ setup(
     install_requires=[
         'Flask >= 0.10.1',
         'Flask-Admin >= 1.0.8',
+        'Flask-Login >= 0.2.11',
         'Flask-Plugins >= 1.4',
+        'Flask-SQLAlchemy >= 1.0',
+        'Flask-Uploads >= 0.1.3',
         'Flask-WTF >= 0.9.5',
         'sigal >= 0.7.0',
         'Pillow >= 2.5.1',
