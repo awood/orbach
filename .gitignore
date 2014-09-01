@@ -4,3 +4,41 @@
 
 build/
 dist/
+.webassets-cache/
+**/static/generated
+
+# bootstrap-treeview has this as a dependency but we use bootstrap-sass-official
+**/static/bootstrap
+
+# Ignore a lot of static stuff that we aren't going to need.
+**/static/**/bower.json
+**/static/**/.bower.json
+**/static/**/composer.json
+**/static/**/package.json
+**/static/**/Gruntfile.js
+**/static/**/README*
+**/static/**/CHANGELOG*
+**/static/**/AUTHORS*
+**/static/**/CONTRIBUTING*
+**/static/**/less
+
+**/static/bootstrap-sass-official/sache.json
+
+**/static/bootstrap-select/test.html
+**/static/bootstrap-select/js
+**/static/bootstrap-select/bootstrap-select.jquery.json
+
+**/static/bootstrap-treeview/public
+**/static/bootstrap-treeview/screenshot
+**/static/bootstrap-treeview/app.js
+
+**/static/font-awesome/.gitignore
+**/static/font-awesome/.npmignore
+
+**/static/jquery/test
+**/static/jquery/speed
+**/static/jquery/.editorconfig*
+**/static/jquery/.git*
+**/static/jquery/.jshintrc*
+**/static/jquery/.mailmap*
+**/static/jquery/component.json
