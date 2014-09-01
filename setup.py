@@ -9,6 +9,7 @@ install_requires = [
     'Flask-Admin >= 1.0.8',
     'Flask-Login >= 0.2.11',
     'Flask-Plugins >= 1.4',
+    'Flask-Script >= 2.0.3',
     'Flask-SQLAlchemy >= 1.0',
     'Flask-Uploads >= 0.1.3',
     'Flask-WTF >= 0.9.5',
