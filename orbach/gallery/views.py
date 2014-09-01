@@ -1,7 +1,7 @@
 from __future__ import print_function, division, absolute_import
-from orbach import app
+from orbach.gallery import gallery
 
 
-@app.route('/')
+@gallery.route('/')
 def hello():
     return "Hello"
