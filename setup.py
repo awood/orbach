@@ -7,6 +7,7 @@ install_requires = [
     'SQLAlchemy >= 0.9.7',
     'Flask >= 0.10.1',
     'Flask-Admin >= 1.0.8',
+    'Flask-Assets >= 0.10.0',
     'Flask-Login >= 0.2.11',
     'Flask-Plugins >= 1.4',
     'Flask-Script >= 2.0.3',
@@ -14,6 +15,9 @@ install_requires = [
     'Flask-Uploads >= 0.1.3',
     'Flask-WTF >= 0.9.5',
     'Pillow >= 2.5.1',
+    'jsmin >= 2.0.11',
+    'cssmin >= 0.2.0',
+    'pyScss >= 1.2.0',
 ]
 
 tests_require = [
