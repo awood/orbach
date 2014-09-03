@@ -2,7 +2,7 @@
     "name": "Orbach",
     "private": true,
     "dependencies": {
-        "bootstrap-sass-official": "~3.2.0",
+        "bootstrap-sass-official": "~3.1.0",
         "bootstrap-select": "~1.6.2",
         "bootstrap-treeview": "~1.0.1",
         "font-awesome": "~4.2.0",
