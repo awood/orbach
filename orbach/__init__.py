@@ -28,7 +28,7 @@ def bundle_js(assets):
     assets.register('js_all', js)
 
 
-def bundle_scss(assets):
+def bundle_css(assets):
     # TODO Apparently these paths can be placed in a YAML file.  Might be worth doing.
     load_paths = [
         'bootstrap-sass-official/vendor/assets/stylesheets',
@@ -40,13 +40,18 @@ def bundle_scss(assets):
     scss_assets = [
         'orbach.scss',
     ]
-    scss = Bundle(*scss_assets, filters='pyscss', output='generated/orbach.scss', depends=('**/*.scss'))
-    assets.register('scss_all', scss)
+    css = Bundle(*scss_assets, filters='pyscss', output='generated/orbach.css', depends=('**/*.scss'))
+
+    if not app.debug:
+        css = Bundle(css, filters="cssmin")
+
+    assets.register('css_all', css)
 
 
 def init_app(app, config):
     OrbachLog.setup(app)
 
+    app.config.from_object(config)
     app.debug = app.config['DEBUG']
 
     assets.debug = app.config['DEBUG']
@@ -54,7 +59,7 @@ def init_app(app, config):
     assets.directory = app.static_folder
 
     bundle_js(assets)
-    bundle_scss(assets)
+    bundle_css(assets)
 
     from orbach.gallery import gallery as gallery_blueprint
     app.register_blueprint(gallery_blueprint)

@@ -6,4 +6,4 @@ import flask
 
 @gallery.route('/')
 def index():
-    return flask.render_template('index.html')
+    return flask.render_template('gallery_index.html')
