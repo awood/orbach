@@ -1,14 +1,28 @@
 from __future__ import print_function, division, absolute_import
 
+import logging
 import os
 
 from flask import Flask
 from flask.ext.assets import Environment, Bundle
+from logging.handlers import RotatingFileHandler
 
-from orbach.logger import OrbachLog
 
 app = Flask(__name__.split('.')[0])
 assets = Environment(app)
+
+class OrbachLog(object):
+    @staticmethod
+    def setup(app):
+        handler = RotatingFileHandler('orbach.log', maxBytes=10000, backupCount=2)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+
+        if app.debug:
+            handler.setLevel(logging.DEBUG)
+        else:
+            handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
 
 
 def read_config():
@@ -18,14 +32,36 @@ def read_config():
 
 
 def bundle_js(assets):
+    # TODO - Need to strip down Bootstrap JS to take out unnecessary components
+    # like the carousel.
     js_assets = [
         'jquery/jquery.js',
         'bootstrap-select/dist/js/bootstrap-select.js',
         'bootstrap-sass-official/vendor/assets/javascripts/bootstrap.js',
         'bootstrap-treeview/src/js/bootstrap-treeview.js',
     ]
-    js = Bundle(*js_assets, filters='rjsmin', output='generated/orbach.min.js')
+
+    if not app.debug:
+        filters = 'rjsmin'
+    else:
+        filters = None
+
+    js = Bundle(*js_assets, filters=filters, output='generated/orbach.min.js')
     assets.register('js_all', js)
+
+
+def bundle_galleria(assets):
+    galleria_assets = [
+        'galleria/src'
+    ]
+
+    if not app.debug:
+        filters = 'rjsmin'
+    else:
+        filters = None
+
+    galleria = Bundle(*galleria_assets, filters=filters, output='generated/galleria.min.js')
+    assets.register('galleria', galleria)
 
 
 def bundle_css(assets):
@@ -52,9 +88,10 @@ def init_app(app, config):
     OrbachLog.setup(app)
 
     app.config.from_object(config)
+
     app.debug = app.config['DEBUG']
 
-    assets.debug = app.config['DEBUG']
+    assets.debug = app.debug
     assets.url = app.static_url_path
     assets.directory = app.static_folder
 
