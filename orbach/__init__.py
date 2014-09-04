@@ -32,12 +32,16 @@ def read_config():
 
 
 def bundle_js(assets):
-    # TODO - Need to strip down Bootstrap JS to take out unnecessary components
-    # like the carousel.
+    bs_root = 'bootstrap-sass-official/vendor/assets/javascripts/bootstrap'
     js_assets = [
         'jquery/jquery.js',
+        '%s/transition.js' % bs_root,
+        '%s/alert.js' % bs_root,
+        '%s/button.js' % bs_root,
+        '%s/tab.js' % bs_root,
+        '%s/modal.js' % bs_root,
+        '%s/dropdown.js' % bs_root,
         'bootstrap-select/dist/js/bootstrap-select.js',
-        'bootstrap-sass-official/vendor/assets/javascripts/bootstrap.js',
         'bootstrap-treeview/src/js/bootstrap-treeview.js',
     ]
 
