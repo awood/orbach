@@ -11,6 +11,7 @@ from logging.handlers import RotatingFileHandler
 app = Flask(__name__.split('.')[0])
 assets = Environment(app)
 
+
 class OrbachLog(object):
     @staticmethod
     def setup(app):
@@ -22,6 +23,7 @@ class OrbachLog(object):
             handler.setLevel(logging.DEBUG)
         else:
             handler.setLevel(logging.INFO)
+        app.config['LOGGER_NAME'] = 'orbach'
         app.logger.addHandler(handler)
 
 

@@ -4,4 +4,7 @@ from flask import Blueprint
 
 gallery = Blueprint('gallery', __name__, template_folder="templates")
 
-from orbach.gallery import views
+# Flask requires that all view functions be imported in the __init__.py but
+# this unfortunately causes Flake8 to complain about unused imports so we tag
+# this line NOQA
+from orbach.gallery import views  # NOQA
