@@ -7,7 +7,7 @@ from textwrap import dedent
 
 from ConfigParser import SafeConfigParser
 
-from orbach.config import Config
+from orbach.config import Config, MissingSectionError
 
 
 class ConfigTest(unittest.TestCase):
@@ -51,7 +51,7 @@ class ConfigTest(unittest.TestCase):
             conf['foo'] = 'bar'
             parser = SafeConfigParser()
             parser.read(t)
-            self.assertTrue(parser.has_option(conf.SECTION, 'foo'))
+            self.assertTrue(parser.has_option(conf.section, 'foo'))
             self.assertEquals('bar', conf['foo'])
 
     def test_set_unicode(self):
@@ -66,7 +66,7 @@ class ConfigTest(unittest.TestCase):
             del(conf['hello'])
             parser = SafeConfigParser()
             parser.read(t)
-            self.assertFalse(parser.has_option(conf.SECTION, 'hello'))
+            self.assertFalse(parser.has_option(conf.section, 'hello'))
             with self.assertRaises(KeyError):
                 conf['hello']
 
@@ -76,3 +76,53 @@ class ConfigTest(unittest.TestCase):
             for k, v in conf:
                 self.assertTrue(isinstance(k, unicode))
                 self.assertTrue(isinstance(v, unicode))
+
+
+class ConfigWithSectionsTest(unittest.TestCase):
+    def setUp(self):
+        self.content = dedent("""
+            [orbach]
+            hello = world
+            goodbye = world
+
+            [other]
+            foo = bar
+            baz = qux
+        """)
+
+    def test_section_access(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            self.assertEquals('bar', conf.other['foo'])
+            self.assertEquals('qux', conf.other['baz'])
+
+    def test_del_from_section(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            del(conf.other['foo'])
+            parser = SafeConfigParser()
+            parser.read(t)
+            self.assertFalse(parser.has_option('other', 'foo'))
+            with self.assertRaises(KeyError):
+                conf.other['foo']
+
+    def test_set_to_section(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            conf.other['abc'] = 'xyz'
+            parser = SafeConfigParser()
+            parser.read(t)
+            self.assertTrue(parser.has_option('other', 'abc'))
+            self.assertEquals('xyz', conf.other['abc'])
+
+    def test_other_sections(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            self.assertFalse(conf.section in conf.other_sections())
+            self.assertEquals(['other'], conf.other_sections())
+
+    def test_missing_section(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            with self.assertRaises(MissingSectionError):
+                conf.missing
