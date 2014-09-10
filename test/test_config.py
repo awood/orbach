@@ -105,14 +105,15 @@ class ConfigTest(unittest.TestCase):
         reserved = dedent("""
             [orbach]
             DEBUG = True
-            debug = False
             USE_X_SENDFILE = True
         """)
         with temp_file(reserved) as t:
             conf = Config(t)
             self.assertEquals("True", conf['DEBUG'])
-            self.assertEquals("False", conf['debug'])
+            self.assertEquals("True", conf['debug'])
             self.assertEquals("True", conf['USE_X_SENDFILE'])
+            conf['use_x_sendfile'] = "False"
+            self.assertEquals("False", conf['USE_X_SENDFILE'])
 
 
 class ConfigWithSectionsTest(unittest.TestCase):

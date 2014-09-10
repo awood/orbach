@@ -10,35 +10,6 @@ from itertools import imap
 from orbach.util import unicode_in, unicode_out, to_unicode
 from orbach.errors import OrbachError
 
-# There is no list of these in the Flask codebase that I can find
-# aside from the documentation.  The reserved values are accessed individually
-# in flask.app.Flask
-FLASK_RESERVED = [
-    'DEBUG',
-    'TESTING',
-    'PROPAGATE_EXCEPTIONS',
-    'PRESERVE_CONTEXT_ON_EXCEPTION',
-    'SECRET_KEY',
-    'SESSION_COOKIE_NAME',
-    'SESSION_COOKIE_DOMAIN',
-    'SESSION_COOKIE_PATH',
-    'SESSION_COOKIE_HTTPONLY',
-    'SESSION_COOKIE_SECURE',
-    'PERMANENT_SESSION_LIFETIME',
-    'USE_X_SENDFILE',
-    'LOGGER_NAME',
-    'SERVER_NAME',
-    'APPLICATION_ROOT',
-    'MAX_CONTENT_LENGTH',
-    'SEND_FILE_MAX_AGE_DEFAULT',
-    'TRAP_HTTP_EXCEPTIONS',
-    'TRAP_BAD_REQUEST_ERRORS',
-    'PREFERRED_URL_SCHEME',
-    'JSON_AS_ASCII',
-    'JSON_SORT_KEYS',
-    'JSONIFY_PRETTYPRINT_REGULAR',
-    ]
-
 
 class MissingSectionError(OrbachError):
     """Raised when no section matches a requested option."""
@@ -98,13 +69,13 @@ class ConfigBase(object):
 
     __str__ = __repr__
 
+
 class Config(ConfigBase):
     SECTION = "orbach"
 
     def __init__(self, conf_file):
         super(Config, self).__init__()
         self._parser = SafeConfigParser()
-        self._parser.optionxform = self.optionxform(self._parser.optionxform)
 
         self.conf_file = conf_file
         self.parser.read(self.conf_file)
@@ -154,13 +125,6 @@ class Config(ConfigBase):
         for s in self.other_sections():
             dict_repr += " %s: %s" % (s, str(getattr(self, s)))
         return dict_repr
-
-    def optionxform(self, func):
-        def wrapper(option):
-            if option in FLASK_RESERVED:
-                return option
-            return func(option)
-        return wrapper
 
 
 class ConfigSection(ConfigBase):
