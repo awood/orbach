@@ -2,7 +2,7 @@ from __future__ import print_function, division, absolute_import
 
 import unittest
 
-from test import temp_file
+from test import temp_file, open_mock
 from textwrap import dedent
 
 from ConfigParser import SafeConfigParser
@@ -114,6 +114,15 @@ class ConfigTest(unittest.TestCase):
             self.assertEquals("True", conf['USE_X_SENDFILE'])
             conf['use_x_sendfile'] = "False"
             self.assertEquals("False", conf['USE_X_SENDFILE'])
+
+    def test_read_stream(self):
+        stream = dedent(u"""
+            [orbach]
+            foo = baz
+        """)
+        with open_mock(stream) as m:
+            conf = Config(m)
+            self.assertEquals("baz", conf['foo'])
 
 
 class ConfigWithSectionsTest(unittest.TestCase):

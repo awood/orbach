@@ -7,7 +7,7 @@ import tempfile
 from io import StringIO
 from contextlib import contextmanager
 from mock import mock_open, patch
-from orbach.util import unicode_in, unicode_out
+from orbach.util import unicode_in, unicode_out, to_unicode
 
 
 @contextmanager
@@ -28,8 +28,15 @@ def temp_file(content, *args, **kwargs):
 @unicode_in
 def open_mock(content, **kwargs):
     m = mock_open(read_data=content)
-    with patch('__builtin__.open', m, create=True, **kwargs) as m:
-        yield m
+    content_out = StringIO()
+    with patch('__builtin__.open', m, create=True, **kwargs) as mo:
+        # mock_open doesn't provide readline() or write() so we do it ourselves.
+        # the unicode_in decorator will ensure content is UTF-8
+        stream = StringIO(content)
+        mo.readline = lambda: stream.readline()
+        mo.write = lambda x: content_out.write(to_unicode(x))
+        mo.content_out = lambda: content_out.getvalue()
+        yield mo
 
 
 def assert_items_equals(self, a, b):

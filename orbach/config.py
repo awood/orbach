@@ -78,7 +78,13 @@ class Config(ConfigBase):
         self._parser = SafeConfigParser()
 
         self.conf_file = conf_file
-        self.parser.read(self.conf_file)
+        self.is_stream = hasattr(conf_file, "readline")
+
+        if self.is_stream:
+            self.parser.readfp(conf_file)
+        else:
+            self.parser.read(self.conf_file)
+
         for s in self.other_sections():
             for k, v in self.parser.items(s):
                 self.parser.set(s, to_unicode(k), to_unicode(v))
@@ -106,6 +112,9 @@ class Config(ConfigBase):
         self._parser = value
 
     def _persist(self):
+        if self.is_stream:
+            return
+
         try:
             with open(self.conf_file, 'w') as f:
                 self.parser.write(f)
