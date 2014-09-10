@@ -7,6 +7,19 @@ from flask import Flask
 from flask.ext.assets import Environment, Bundle
 from logging.handlers import RotatingFileHandler
 
+from textwrap import dedent
+from io import StringIO
+
+from orbach.config import Config
+
+import flask.config
+
+DEFAULT_CONFIG = dedent(u"""
+[orbach]
+debug = False
+logger_name = orbach
+json_as_asii = False
+""")
 
 app = Flask(__name__.split('.')[0])
 assets = Environment(app)
@@ -23,14 +36,16 @@ class OrbachLog(object):
             handler.setLevel(logging.DEBUG)
         else:
             handler.setLevel(logging.INFO)
-        app.config['LOGGER_NAME'] = 'orbach'
         app.logger.addHandler(handler)
 
 
-def read_config():
-    return {
-        'debug': True
-    }
+def read_config(config_file):
+    try:
+        stream = open(config_file, 'r')
+    except Exception:
+        app.logger.exception("Failed to open %s" % config_file)
+        stream = StringIO(DEFAULT_CONFIG)
+    return Config(stream)
 
 
 def bundle_js(assets):
@@ -91,11 +106,8 @@ def bundle_css(assets):
 
 
 def init_app(app, config):
-    OrbachLog.setup(app)
-
     app.config.from_object(config)
-
-    app.debug = app.config['DEBUG']
+    OrbachLog.setup(app)
 
     assets.debug = app.debug
     assets.url = app.static_url_path
@@ -113,9 +125,6 @@ def init_app(app, config):
     return app
 
 
-def main():
-    return init_app(app, read_config())
-
-if __name__ != "__main__":
-    # Twisted/Gunicorn/etc will take this path
-    app = main()
+def init_from_file(config_file):
+    config = read_config(config_file)
+    return init_app(app, config)
