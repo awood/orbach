@@ -77,6 +77,43 @@ class ConfigTest(unittest.TestCase):
                 self.assertTrue(isinstance(k, unicode))
                 self.assertTrue(isinstance(v, unicode))
 
+    def test_getboolean(self):
+        boolean_conf = dedent("""
+            [orbach]
+            x = True
+            y = False
+            a = on
+            b = off
+        """)
+        with temp_file(boolean_conf) as t:
+            conf = Config(t)
+            self.assertTrue(conf.getboolean('x'))
+            self.assertTrue(conf.getboolean('a'))
+            self.assertFalse(conf.getboolean('y'))
+            self.assertFalse(conf.getboolean('b'))
+
+    def test_getint(self):
+        boolean_conf = dedent("""
+            [orbach]
+            x = 123
+        """)
+        with temp_file(boolean_conf) as t:
+            conf = Config(t)
+            self.assertEquals(123, conf.getint('x'))
+
+    def test_reserved_options(self):
+        reserved = dedent("""
+            [orbach]
+            DEBUG = True
+            debug = False
+            USE_X_SENDFILE = True
+        """)
+        with temp_file(reserved) as t:
+            conf = Config(t)
+            self.assertEquals("True", conf['DEBUG'])
+            self.assertEquals("False", conf['debug'])
+            self.assertEquals("True", conf['USE_X_SENDFILE'])
+
 
 class ConfigWithSectionsTest(unittest.TestCase):
     def setUp(self):

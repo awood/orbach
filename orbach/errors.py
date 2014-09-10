@@ -1,6 +1,7 @@
 from __future__ import print_function, division, absolute_import
 
-# Exception classes
+
+# General exception classes
 class OrbachError(Exception):
     """Base class for exceptions."""
 
