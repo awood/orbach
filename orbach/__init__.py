@@ -12,7 +12,6 @@ from io import StringIO
 
 from orbach.config import Config
 
-import flask.config
 
 DEFAULT_CONFIG = dedent(u"""
 [orbach]

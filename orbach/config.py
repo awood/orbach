@@ -1,159 +1,157 @@
 from __future__ import print_function, division, absolute_import
 
-import abc
 import logging
 import pprint
 
-from ConfigParser import SafeConfigParser, NoOptionError
-from itertools import imap
+from ConfigParser import SafeConfigParser
+from flask import Flask
 
-from orbach.util import unicode_in, unicode_out, to_unicode
 from orbach.errors import OrbachError
+from orbach.util import unicode_in, unicode_out
+
+FLASK_RESERVED = Flask.default_config.keys()
 
 
 class MissingSectionError(OrbachError):
-    """Raised when no section matches a requested option."""
+    """Raised when no _section matches a requested option."""
 
     def __init__(self, section):
         OrbachError.__init__(self, 'No section: %r' % (section,))
-        self.section = section
+        self._section = section
         self.args = (section, )
 
 
-class ConfigBase(object):
-    __metaclass__ = abc.ABCMeta
+class MissingOptionError(OrbachError):
+    """Raised when no _section matches a requested option."""
 
-    @abc.abstractproperty
-    def section(self):
-        return
+    def __init__(self, option):
+        OrbachError.__init__(self, 'No option: %r' % (option,))
+        self._section = option
+        self.args = (option, )
 
-    @abc.abstractproperty
-    def parser(self):
-        return
 
-    def __len__(self):
-        return len(self.parser.items(self.section))
+class Config(object):
+    SECTION = "orbach"
+
+    def __init__(self, conf_file):
+        self._parser = SafeConfigParser()
+
+        self._conf_file = conf_file
+
+        if self._is_stream:
+            self._parser.readfp(conf_file)
+        else:
+            self._parser.read(self._conf_file)
+
+        self._section = Config.SECTION
+        self._child_sections = {}
+        for s in self.other_sections():
+            self[s] = ConfigSection(self, s)
+
+        self.__setattrs()
+
+    @property
+    def _is_stream(self):
+        return hasattr(self._conf_file, 'readline')
+
+    @unicode_in
+    def __setattr__(self, name, value):
+        # If they are setting the attribute in lowercase.
+        # E.g. self.debug will throw an error but self.DEBUG will not
+        if name.upper() in FLASK_RESERVED and name not in FLASK_RESERVED:
+            raise AttributeError("Cannot set %s.  Maybe you meant %s?" % (name, name.upper()))
+        if name[0] != "_":
+            self._parser.set(self._section, name, value)
+            self._persist()
+        super(Config, self).__setattr__(name, value)
+
+    def __setattrs(self):
+        # TODO need to validate keys are valid python identifiers.  E.g. nothing
+        # staring with a number or symbol.
+        for k in self._parser.options(self._section):
+            if k.upper() in FLASK_RESERVED:
+                k = k.upper()
+            setattr(self, k, self._parser.get(self._section, k))
 
     @unicode_out
+    def __getattr__(self, name):
+        """Called when accessing nonexistent attributes"""
+        # By default, ConfigParser is agnostic about case, but we want to be picky when
+        # dealing with Flask reserved configuration options.
+        if name[0] == "_":
+            raise AttributeError("Missing attribute %s" % name)
+        if self._parser.has_option(self._section, name) and name.upper() not in FLASK_RESERVED:
+            return self._parser.get(self._section, name)
+        else:
+            raise MissingOptionError(name)
+
+    def __delattr__(self, name):
+        if self._parser.has_option(self._section, name):
+            self._parser.remove_option(self._section, name)
+            self._persist()
+        super(Config, self).__delattr__(name)
+
+    def __len__(self):
+        return len(self._child_sections)
+
     def __getitem__(self, key):
         try:
-            return self.parser.get(self.section, key)
-        except NoOptionError as e:
+            return self._child_sections[key]
+        except KeyError as e:
             logging.exception(e)
-            raise KeyError(e)
+            raise MissingSectionError(key)
 
     @unicode_in
     def __setitem__(self, key, value):
-        self.parser.set(self.section, key, value)
+        self._child_sections[key] = value
 
     def __delitem__(self, key):
-        self.parser.remove_option(self.section, key)
+        del self._child_sections[key]
+        self._parser.remove_section(key)
+        self._persist()
 
     @unicode_in
     def __contains__(self, item):
-        return self.parser.has_option(self.section, item)
+        return item in self._child_sections.keys()
+
+    def other_sections(self):
+        s = self._parser.sections()
+        if self._section in s:
+            s.remove(self._section)
+        return s
 
     def __iter__(self):
-        return imap(
-            lambda x: (to_unicode(x[0]), to_unicode(x[1])),
-            self.parser.items(self.section))
+        return self._child_sections.iteritems()
+
+    def _persist(self):
+        if self._is_stream:
+            return
+        try:
+            with open(self._conf_file, 'w') as f:
+                self._parser.write(f)
+        except Exception:
+            logging.exception("Unable to open %s" % self._conf_file)
 
     def getboolean(self, item):
-        return self.parser.getboolean(self.section, item)
+        return self._parser.getboolean(self._section, item)
 
     def getint(self, item):
-        return self.parser.getint(self.section, item)
+        return self._parser.getint(self._section, item)
 
     def __repr__(self):
-        return pprint.pformat(dict((x for x in self)))
+        return pprint.pformat(self.__dict__)
 
     __str__ = __repr__
 
 
-class Config(ConfigBase):
-    SECTION = "orbach"
-
-    def __init__(self, conf_file):
-        super(Config, self).__init__()
-        self._parser = SafeConfigParser()
-
-        self.conf_file = conf_file
-        self.is_stream = hasattr(conf_file, "readline")
-
-        if self.is_stream:
-            self.parser.readfp(conf_file)
-        else:
-            self.parser.read(self.conf_file)
-
-        for s in self.other_sections():
-            for k, v in self.parser.items(s):
-                self.parser.set(s, to_unicode(k), to_unicode(v))
-            setattr(self, s, ConfigSection(self, s))
-
-    def __getattr__(self, attr):
-        raise MissingSectionError(attr)
-
-    @property
-    def section(self):
-        return self.SECTION
-
-    def other_sections(self):
-        s = self.parser.sections()
-        if self.section in s:
-            s.remove(self.section)
-        return s
-
-    @property
-    def parser(self):
-        return self._parser
-
-    @parser.setter
-    def parser(self, value):
-        self._parser = value
-
-    def _persist(self):
-        if self.is_stream:
-            return
-
-        try:
-            with open(self.conf_file, 'w') as f:
-                self.parser.write(f)
-        except Exception:
-            logging.exception("Unable to open %s" % self.conf_file)
-
-    def __setitem__(self, key, value):
-        super(Config, self).__setitem__(key, value)
-        self._persist()
-
-    def __delitem__(self, key):
-        super(Config, self).__delitem__(key)
-        self._persist()
-
-    def __str__(self):
-        dict_repr = super(Config, self).__str__()
-        for s in self.other_sections():
-            dict_repr += " %s: %s" % (s, str(getattr(self, s)))
-        return dict_repr
-
-
-class ConfigSection(ConfigBase):
+class ConfigSection(Config):
     def __init__(self, parent, section):
-        super(ConfigSection, self).__init__()
         self._section = section
-        self.parent = parent
+        self._parent = parent
+        self._parser = self._parent._parser
+        self._conf_file = self._parent._conf_file
+        self.__setattrs()
 
-    @property
-    def parser(self):
-        return self.parent.parser
-
-    @property
-    def section(self):
-        return self._section
-
-    def __setitem__(self, key, value):
-        super(ConfigSection, self).__setitem__(key, value)
-        self.parent._persist()
-
-    def __delitem__(self, key):
-        super(ConfigSection, self).__delitem__(key)
-        self.parent._persist()
+    def __setattrs(self):
+        for k in self._parser.options(self._section):
+            setattr(self, k, self._parser.get(self._section, k))
