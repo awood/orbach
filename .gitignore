@@ -1,6 +1,7 @@
 *.egg-info/
 *.egg
 *.log
+*.db
 
 build/
 dist/

@@ -34,6 +34,7 @@ cmdclass = {
 
 install_requires = [
     'SQLAlchemy >= 0.9.7',
+    'alembic >= 0.6.7',
     'Flask >= 0.10.1',
     'Flask-Admin >= 1.0.8',
     'Flask-Assets < 0.10.0',
