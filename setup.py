@@ -1,7 +1,36 @@
 #! /usr/bin/env python
 
+import os
+
+from glob import glob
+
 from setuptools import setup, find_packages
 
+from distutils import log
+from distutils.command.clean import clean as _clean
+from distutils.dir_util import remove_tree
+
+
+class clean(_clean):
+    def initialize_options(self):
+        self.egg_base = None
+        _clean.initialize_options(self)
+
+    def finalize_options(self):
+        self.set_undefined_options('egg_info', ('egg_base', 'egg_base'))
+        _clean.finalize_options(self)
+
+    def run(self):
+        if self.all:
+            for f in glob(os.path.join(self.egg_base, '*.egg-info')):
+                log.info("removing %s" % f)
+                remove_tree(f, dry_run=self.dry_run)
+        _clean.run(self)
+
+
+cmdclass = {
+    'clean': clean,
+}
 
 install_requires = [
     'SQLAlchemy >= 0.9.7',
@@ -31,6 +60,7 @@ setup(
     author='Alex Wood',
     description='A simple gallery display tool',
     license='MIT',
+    cmdclass=cmdclass,
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
