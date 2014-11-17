@@ -24,12 +24,12 @@ def upgrade():
     roles = sa.Table('roles', meta,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('name', sa.Unicode(50), nullable=False),
-        sa.Column('description', sa.Unicode(500))
+        sa.Column('description', sa.Unicode(500)),
     )
     roles.create(op.get_bind())
 
     op.bulk_insert(roles, [
-            {'id': 1, 'name': 'ADMIN', 'description': 'Administrator'},
+            {'id': 1, 'name': u'ADMIN', 'description': u'Administrator'},
         ],
         multiinsert=False
     )
@@ -38,13 +38,13 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('username', sa.Unicode(50), nullable=False),
         sa.Column('password', sa.String(60), nullable=False),
-        sa.Column('role', sa.Integer, sa.ForeignKey('roles.id'))
+        sa.Column('role_id', sa.Integer, sa.ForeignKey('roles.id')),
     )
     users.create(op.get_bind())
 
     password = bcrypt.hashpw('admin', bcrypt.gensalt())
     op.bulk_insert(users, [
-            {'id': 1, 'username': 'admin', 'password': password, 'role': '1'},
+            {'id': 1, 'username': u'admin', 'password': password, 'role_id': '1'},
         ],
         multiinsert=False
     )
@@ -62,17 +62,22 @@ def upgrade():
     images = sa.Table('images', meta,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('file', sa.Unicode(300), nullable=False),
-        sa.Column('created_by', sa.Integer, sa.ForeignKey('users.id'))
+        sa.Column('created_by', sa.Integer, sa.ForeignKey('users.id')),
+        sa.Column('created', sa.DATETIME, server_default=sa.func.now()),
+        sa.Column('modified', sa.DATETIME, server_default=sa.func.now(), server_onupdate=sa.func.now()),
     )
     images.create(op.get_bind())
 
     # TODO Add cascade deletes for pictures/covers
+    # We have to add the unique constraint to satisfy a sqlite quirk
+    # See https://www.sqlite.org/foreignkeys.html and http://stackoverflow.com/a/7542427
     pictures = sa.Table('pictures', meta,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('title', sa.Unicode(300)),
         sa.Column('caption', sa.Unicode(1500)),
         sa.Column('image_id', sa.Integer, sa.ForeignKey('images.id')),
-        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id'))
+        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id')),
+        sa.UniqueConstraint('id', 'gallery_id'),
     )
     pictures.create(op.get_bind())
 
@@ -82,7 +87,7 @@ def upgrade():
         sa.Column('gallery_id', sa.Integer),
         sa.schema.ForeignKeyConstraint(
             ['picture_id', 'gallery_id'], ['pictures.id', 'pictures.gallery_id']
-        )
+        ),
     )
     covers.create(op.get_bind())
 

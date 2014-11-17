@@ -54,6 +54,7 @@ tests_require = [
     'mock >= 1.0.1',
     'nose >= 1.3.3',
     'Flask-Testing >= 0.4.2',
+    'pysqlite >= 2.6.3',
 ] + install_requires
 
 setup(
