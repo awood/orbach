@@ -59,10 +59,10 @@ class ConfigTest(unittest.TestCase):
         """)
         with temp_file(boolean_conf) as t:
             conf = Config(t)
-            self.assertTrue(conf.getboolean('x'))
-            self.assertTrue(conf.getboolean('a'))
-            self.assertFalse(conf.getboolean('y'))
-            self.assertFalse(conf.getboolean('b'))
+            self.assertTrue(conf.get_boolean('x'))
+            self.assertTrue(conf.get_boolean('a'))
+            self.assertFalse(conf.get_boolean('y'))
+            self.assertFalse(conf.get_boolean('b'))
 
     def test_getint(self):
         boolean_conf = dedent("""
@@ -71,7 +71,23 @@ class ConfigTest(unittest.TestCase):
         """)
         with temp_file(boolean_conf) as t:
             conf = Config(t)
-            self.assertEquals(123, conf.getint('x'))
+            self.assertEquals(123, conf.get_int('x'))
+
+    def test_to_boolean(self):
+        boolean_conf = dedent("""
+            [orbach]
+            x = True
+            y = False
+            a = on
+            b = off
+        """)
+        with temp_file(boolean_conf) as t:
+            conf = Config(t)
+            conf.to_boolean('x', 'y', 'a', 'b')
+            self.assertEquals(True, conf.x)
+            self.assertEquals(True, conf.a)
+            self.assertEquals(False, conf.y)
+            self.assertEquals(False, conf.b)
 
     def test_reserved_options(self):
         reserved = dedent("""

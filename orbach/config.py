@@ -60,8 +60,8 @@ class Config(object):
         # E.g. self.debug will throw an error but self.DEBUG will not
         if name.upper() in FLASK_RESERVED and name not in FLASK_RESERVED:
             raise AttributeError("Cannot set %s.  Maybe you meant %s?" % (name, name.upper()))
-        if name[0] != "_":
-            self._parser.set(self._section, name, value)
+        if not name.startswith("_"):
+            self._parser.set(self._section, name, str(value))
             self._persist()
         super(Config, self).__setattr__(name, value)
 
@@ -78,7 +78,7 @@ class Config(object):
         """Called when accessing nonexistent attributes"""
         # By default, ConfigParser is agnostic about case, but we want to be picky when
         # dealing with Flask reserved configuration options.
-        if name[0] == "_":
+        if name.startswith("_"):
             raise AttributeError("Missing attribute %s" % name)
         if self._parser.has_option(self._section, name) and name.upper() not in FLASK_RESERVED:
             return self._parser.get(self._section, name)
@@ -132,16 +132,26 @@ class Config(object):
         except Exception:
             logging.exception("Unable to open %s" % self._conf_file)
 
-    def getboolean(self, item):
+    def get_boolean(self, item):
         return self._parser.getboolean(self._section, item)
 
-    def getint(self, item):
+    def get_int(self, item):
         return self._parser.getint(self._section, item)
+
+    def to_boolean(self, *args):
+        for option in args:
+            setattr(self, option, self.get_boolean(option))
+
+    def to_int(self, *args):
+        for option in args:
+            setattr(self, option, self.get_int(option))
 
     def __repr__(self):
         return pprint.pformat(self.__dict__)
 
-    __str__ = __repr__
+    def __str__(self):
+        settings = filter(lambda t: not t[0].startswith('_'), self.__dict__.iteritems())
+        return pprint.pformat(dict(settings))
 
 
 class ConfigSection(Config):
