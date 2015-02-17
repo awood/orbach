@@ -1,7 +1,7 @@
 from __future__ import print_function, division, absolute_import
 
-import logging
 import pprint
+import sys
 
 from ConfigParser import SafeConfigParser
 from flask import Flask
@@ -98,7 +98,7 @@ class Config(object):
         try:
             return self._child_sections[key]
         except KeyError as e:
-            logging.exception(e)
+            print(e, file=sys.stderr)
             raise MissingSectionError(key)
 
     @unicode_in
@@ -129,8 +129,9 @@ class Config(object):
         try:
             with open(self._conf_file, 'w') as f:
                 self._parser.write(f)
-        except Exception:
-            logging.exception("Unable to open %s" % self._conf_file)
+        except Exception, e:
+            print("Unable to open %s" % self._conf_file, file=sys.stderr)
+            print(e, file=sys.stderr)
 
     def get_boolean(self, item):
         return self._parser.getboolean(self._section, item)
