@@ -68,10 +68,10 @@ class SchemaTest(unittest.TestCase):
     def test_cover_within_gallery(self):
         for db_id in [1, 2]:
             self.conn.execute("INSERT INTO galleries (id, name, description) VALUES (%d, 'name', 'description')" % db_id)
-            self.conn.execute("INSERT INTO images (id, file, created_by) VALUES (%d, 'filename', 1)" % db_id)
+            self.conn.execute("INSERT INTO image_files (id, file, created_by) VALUES (%d, 'filename', 1)" % db_id)
 
-        self.conn.execute("INSERT INTO pictures (id, title, caption, image_id, gallery_id) VALUES (1, 'title', 'caption', 1, 1)")
-        self.conn.execute("INSERT INTO pictures (id, title, caption, image_id, gallery_id) VALUES (2, 'title', 'caption', 2, 2)")
+        self.conn.execute("INSERT INTO pictures (id, title, caption, image_file_id, gallery_id) VALUES (1, 'title', 'caption', 1, 1)")
+        self.conn.execute("INSERT INTO pictures (id, title, caption, image_file_id, gallery_id) VALUES (2, 'title', 'caption', 2, 2)")
 
         self.conn.execute("INSERT INTO covers (id, picture_id, gallery_id) VALUES (1, 1, 1)")
 

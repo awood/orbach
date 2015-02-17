@@ -1,4 +1,4 @@
-"""create gallery table
+"""Create initial tables
 
 Revision ID: 254368a08676
 Revises: None
@@ -59,7 +59,7 @@ def upgrade():
     )
     galleries.create(op.get_bind())
 
-    images = sa.Table('images', meta,
+    images = sa.Table('image_files', meta,
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('file', sa.Unicode(300), nullable=False),
         sa.Column('created_by', sa.Integer, sa.ForeignKey('users.id')),
@@ -75,7 +75,7 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('title', sa.Unicode(300)),
         sa.Column('caption', sa.Unicode(1500)),
-        sa.Column('image_id', sa.Integer, sa.ForeignKey('images.id')),
+        sa.Column('image_file_id', sa.Integer, sa.ForeignKey('image_files.id')),
         sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id')),
         sa.UniqueConstraint('id', 'gallery_id'),
     )
