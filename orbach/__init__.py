@@ -5,12 +5,14 @@ import os
 
 from flask import Flask
 from flask.ext.assets import Environment, Bundle
+
 from logging.handlers import RotatingFileHandler
 
 from textwrap import dedent
 from io import StringIO
 
 from orbach.config import Config
+from __builtin__ import OSError
 
 
 DEFAULT_CONFIG = dedent(u"""
@@ -23,18 +25,17 @@ json_as_asii = False
 app = Flask(__name__.split('.')[0])
 assets = Environment(app)
 
+LOG_FORMAT = '%(asctime)s [%(name)s(%(module)s:%(lineno)d)] %(message)s'
+
 
 class OrbachLog(object):
     @staticmethod
     def setup(app):
+        app.debug_log_format = LOG_FORMAT
         handler = RotatingFileHandler('orbach.log', maxBytes=10000, backupCount=2)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter(LOG_FORMAT)
+        handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
-
-        if app.debug:
-            handler.setLevel(logging.DEBUG)
-        else:
-            handler.setLevel(logging.INFO)
         app.logger.addHandler(handler)
 
 
@@ -42,9 +43,10 @@ def read_config(config_file):
     try:
         stream = open(config_file, 'r')
     except Exception:
-        app.logger.exception("Failed to open %s" % config_file)
-        stream = StringIO(DEFAULT_CONFIG)
-    return Config(stream)
+        raise IOError("Failed to open %s" % config_file)
+    config = Config(stream)
+    config.to_boolean("DEBUG")
+    return config
 
 
 def bundle_js(assets):
@@ -105,8 +107,9 @@ def bundle_css(assets):
 
 
 def init_app(app, config):
-    app.config.from_object(config)
     OrbachLog.setup(app)
+    app.config.from_object(config)
+    app.logger.debug("Running with configuration: %s" % app.config)
 
     assets.debug = app.debug
     assets.url = app.static_url_path
@@ -121,6 +124,7 @@ def init_app(app, config):
     from orbach.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix="/admin")
 
+    app.logger.info("Orbach is ready!")
     return app
 
 
