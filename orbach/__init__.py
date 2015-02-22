@@ -32,7 +32,7 @@ class OrbachLog(object):
     @staticmethod
     def setup(app):
         app.debug_log_format = LOG_FORMAT
-        handler = RotatingFileHandler('orbach.log', maxBytes=10000, backupCount=2)
+        handler = RotatingFileHandler('orbach.log', maxBytes=5000000, backupCount=2)
         formatter = logging.Formatter(LOG_FORMAT)
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
