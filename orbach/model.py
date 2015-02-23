@@ -1,35 +1,22 @@
 from __future__ import print_function, division, absolute_import
 
-from sqlalchemy import MetaData, event
-from sqlalchemy.engine import Engine
-from sqlalchemy.types import TypeDecorator, Unicode
+from flask.ext.sqlalchemy import Model
 
-from orbach.util import to_unicode
+from sqlalchemy import Column, Integer, DateTime, Unicode, String
+from sqlalchemy import func
 
-
-metadata_convention = {
-    "ix": 'ix_%(column_0_label)s',
-    "uq": "uq_%(table_name)s_%(column_0_name)s",
-    "ck": "ck_%(table_name)s_%(constraint_name)s",
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-    "pk": "pk_%(table_name)s"
-}
-metadata = MetaData(naming_convention=metadata_convention)
+from orbach import DbMeta
 
 
-@event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
+class StandardAttributes():
+    id = Column(Integer, primary_key=True)
+    created = Column(DateTime, server_default=func.now())
+    modified = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
 
-class CoerceUTF8(TypeDecorator):
-    """Safely coerce Python bytestrings to Unicode
-    before passing off to the database."""
+class User(Model, StandardAttributes):
+    __metaclass__ = DbMeta
+    __tablename__ = "users"
 
-    impl = Unicode
-
-    def process_bind_param(self, value, dialect):
-        value = to_unicode(value)
-        return value
+    username = Column(Unicode)
+    password = Column(String)

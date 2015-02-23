@@ -8,7 +8,18 @@ from flask import Flask
 from orbach.errors import OrbachError
 from orbach.util import unicode_in, unicode_out
 
-FLASK_RESERVED = Flask.default_config.keys()
+FLASK_RESERVED = Flask.default_config.keys() + [
+        'SQLALCHEMY_DATABASE_URI',
+        'SQLALCHEMY_BINDS',
+        'SQLALCHEMY_NATIVE_UNICODE',
+        'SQLALCHEMY_ECHO',
+        'SQLALCHEMY_RECORD_QUERIES',
+        'SQLALCHEMY_POOL_SIZE',
+        'SQLALCHEMY_POOL_TIMEOUT',
+        'SQLALCHEMY_POOL_RECYCLE',
+        'SQLALCHEMY_MAX_OVERFLOW',
+        'SQLALCHEMY_COMMIT_ON_TEARDOWN',
+]
 
 
 class MissingSectionError(OrbachError):

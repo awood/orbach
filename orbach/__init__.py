@@ -5,6 +5,7 @@ import os
 
 from flask import Flask
 from flask.ext.assets import Environment, Bundle
+from flask.ext.sqlalchemy import SQLAlchemy, Model, _BoundDeclarativeMeta
 
 from logging.handlers import RotatingFileHandler
 
@@ -12,16 +13,13 @@ from textwrap import dedent
 from io import StringIO
 
 from orbach.config import Config
-from orbach import model
-from __builtin__ import OSError
-
 
 DEFAULT_CONFIG = dedent(u"""
 [orbach]
 debug = False
 logger_name = orbach
 json_as_asii = False
-sqlalchemy_database_uri = "sqlite:///%(current_dir)s"
+sqlalchemy_database_uri = sqlite:///%(current_dir)s
 """) % {
     "current_dir": os.path.join(os.path.abspath(os.path.dirname(__file__)), "orbach.db")
 }
@@ -41,6 +39,48 @@ class OrbachLog(object):
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
         app.logger.addHandler(handler)
+
+
+class DbMeta(_BoundDeclarativeMeta):
+    """Python meta-class for creating the SQLAlchemy declarative base
+
+    The SQLAlchemy object returned from Flask SQLAlchemy has all sorts of classes defined
+    in it that bind to the database context.
+
+    The recommended way to do things is to define a "db" at the module level and then all
+    model object inherit from that.  Unfortunately, we need to read the configuration
+    and do all other stuff first.  Plus, I don't like doing things like that at the module
+    level: it makes testing difficult.
+
+    So instead, we define a meta-class inheriting from the SQLAlchemy meta-class used to
+    construct the bound classes.  Our meta-class has an attribute containing the SQLAlchemy
+    object.  Then we set the base class from an unbound class to the equivalent
+    bound class (e.g. from flask.ext.sqlalchemy.Model to db.Model) and then hand off control
+    back to the SQLAlchemy meta-class.
+
+    Finally, we import the model module which begins the construction of everything.
+    Thus, we have a class with the correct inheritance set at runtime.
+
+    Another solution would be
+
+    def start_app(self):
+        ...
+        db = SQLAlchemy(app)
+        __builtin__.__dict__["my_db"] = db
+
+    And then all model classes could inherit from "my_db.Model".  This solution has the
+    disadvantage of throwing warnings in static analysis since the "my_db" builtin is not
+    normally present.
+    """
+    db = None
+
+    def __new__(cls, name, bases, dct):
+        if DbMeta.db:
+            bases_list = list(bases)
+            if Model in bases_list:
+                bases_list.insert(bases_list.index(Model), DbMeta.db.Model)
+            bases = tuple(bases_list)
+        return super(DbMeta, cls).__new__(cls, name, bases, dct)
 
 
 def read_config(config_file):
@@ -116,12 +156,26 @@ def bundle_css(assets):
     assets.register('css_all', css)
 
 
+def init_db(app):
+    db = SQLAlchemy(app)
+    DbMeta.db = db
+    # Import this so SQLAlchemy listeners will get attached
+    from orbach import alchemy_util  # NOQA
+    from orbach import model  # NOQA
+    return db
+
+
 def init_app(app, config_list):
     OrbachLog.setup(app)
+
+    # TODO The default config should be read here not earlier
+
     for c in config_list:
         app.config.from_object(c)
         app.logger.debug("Loaded %s" % c)
     app.logger.debug("Running with configuration: %s" % app.config)
+
+    app.db = init_db(app)
 
     assets.debug = app.debug
     assets.url = app.static_url_path
