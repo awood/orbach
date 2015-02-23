@@ -30,17 +30,20 @@ class MissingOptionError(OrbachError):
 
 
 class Config(object):
-    SECTION = "orbach"
+    SECTION = u"orbach"
 
-    def __init__(self, conf_file):
+    def __init__(self, conf):
+        """If the conf object send in has a readline method the configuration will
+        be pull from it as a stream.  If the object is a string, the string will be
+        treated as a file to open and read from."""
         self._parser = SafeConfigParser()
 
-        self._conf_file = conf_file
+        self._conf = conf
 
-        if self._is_stream:
-            self._parser.readfp(conf_file)
+        if self._is_stream():
+            self._parser.readfp(conf)
         else:
-            self._parser.read(self._conf_file)
+            self._parser.read(conf)
 
         self._section = Config.SECTION
         self._child_sections = {}
@@ -49,9 +52,8 @@ class Config(object):
 
         self.__setattrs()
 
-    @property
     def _is_stream(self):
-        return hasattr(self._conf_file, 'readline')
+        return hasattr(self._conf, 'readline')
 
     @unicode_in
     def __setattr__(self, name, value):
@@ -122,13 +124,12 @@ class Config(object):
         return self._child_sections.iteritems()
 
     def _persist(self):
-        if self._is_stream:
-            return
-        try:
-            with open(self._conf_file, 'w') as f:
-                self._parser.write(f)
-        except:
-            raise IOError("Unable to open %s" % self._conf_file)
+        if not self._is_stream():
+            try:
+                with open(self._conf, 'w') as f:
+                    self._parser.write(f)
+            except:
+                raise IOError("Unable to open %s" % self._conf)
 
     def get_boolean(self, item):
         return self._parser.getboolean(self._section, item)
@@ -157,7 +158,7 @@ class ConfigSection(Config):
         self._section = section
         self._parent = parent
         self._parser = self._parent._parser
-        self._conf_file = self._parent._conf_file
+        self._conf = self._parent._conf
         self.__setattrs()
 
     def __setattrs(self):

@@ -12,6 +12,7 @@ from textwrap import dedent
 from io import StringIO
 
 from orbach.config import Config
+from orbach import model
 from __builtin__ import OSError
 
 
@@ -20,7 +21,10 @@ DEFAULT_CONFIG = dedent(u"""
 debug = False
 logger_name = orbach
 json_as_asii = False
-""")
+sqlalchemy_database_uri = "sqlite:///%(current_dir)s"
+""") % {
+    "current_dir": os.path.join(os.path.abspath(os.path.dirname(__file__)), "orbach.db")
+}
 
 app = Flask(__name__.split('.')[0])
 assets = Environment(app)
@@ -44,9 +48,15 @@ def read_config(config_file):
         stream = open(config_file, 'r')
     except Exception:
         raise IOError("Failed to open %s" % config_file)
+
     config = Config(stream)
-    config.to_boolean("DEBUG")
-    return config
+    default_config = Config(StringIO(DEFAULT_CONFIG))
+
+    for item in ["DEBUG"]:
+        config.to_boolean(item)
+        default_config.to_boolean(item)
+
+    return (default_config, config)
 
 
 def bundle_js(assets):
@@ -106,9 +116,11 @@ def bundle_css(assets):
     assets.register('css_all', css)
 
 
-def init_app(app, config):
+def init_app(app, config_list):
     OrbachLog.setup(app)
-    app.config.from_object(config)
+    for c in config_list:
+        app.config.from_object(c)
+        app.logger.debug("Loaded %s" % c)
     app.logger.debug("Running with configuration: %s" % app.config)
 
     assets.debug = app.debug
@@ -129,5 +141,5 @@ def init_app(app, config):
 
 
 def init_from_file(config_file):
-    config = read_config(config_file)
-    return init_app(app, config)
+    (default_config, config) = read_config(config_file)
+    return init_app(app, [default_config, config])
