@@ -1,4 +1,4 @@
-from __future__ import print_function, division, absolute_import
+
 
 import unittest
 import os
@@ -52,18 +52,18 @@ class SchemaTest(unittest.TestCase):
             self.context.run_migrations()
 
     def test_admin_user_exists(self):
-        result = self.conn.execute(u"""
+        result = self.conn.execute("""
             SELECT username FROM users
         """).fetchall()
         self.assertEqual(1, len(result))
 
     def test_admin_user_is_admin_role(self):
-        result = self.conn.execute(u"""
+        result = self.conn.execute("""
             SELECT r.name FROM users u, roles r
             WHERE u.username = 'admin' and u.role_id = r.id
         """).fetchall()
         self.assertEquals(1, len(result))
-        self.assertEqual(u"ADMIN", result[0][0])
+        self.assertEqual("ADMIN", result[0][0])
 
     def test_cover_within_gallery(self):
         for db_id in [1, 2]:

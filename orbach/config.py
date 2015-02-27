@@ -1,14 +1,14 @@
-from __future__ import print_function, division, absolute_import
+
 
 import pprint
 
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 from flask import Flask
 
 from orbach.errors import OrbachError
 from orbach.util import unicode_in, unicode_out
 
-FLASK_RESERVED = Flask.default_config.keys() + [
+FLASK_RESERVED = list(Flask.default_config.keys()) + [
         'SQLALCHEMY_DATABASE_URI',
         'SQLALCHEMY_BINDS',
         'SQLALCHEMY_NATIVE_UNICODE',
@@ -41,7 +41,7 @@ class MissingOptionError(OrbachError):
 
 
 class Config(object):
-    SECTION = u"orbach"
+    SECTION = "orbach"
 
     def __init__(self, conf):
         """If the conf object send in has a readline method the configuration will
@@ -123,7 +123,7 @@ class Config(object):
 
     @unicode_in
     def __contains__(self, item):
-        return item in self._child_sections.keys()
+        return item in list(self._child_sections.keys())
 
     def other_sections(self):
         s = self._parser.sections()
@@ -132,7 +132,7 @@ class Config(object):
         return s
 
     def __iter__(self):
-        return self._child_sections.iteritems()
+        return iter(self._child_sections.items())
 
     def _persist(self):
         if not self._is_stream():
@@ -160,7 +160,7 @@ class Config(object):
         return pprint.pformat(self.__dict__)
 
     def __str__(self):
-        settings = filter(lambda t: not t[0].startswith('_'), self.__dict__.iteritems())
+        settings = [t for t in iter(self.__dict__.items()) if not t[0].startswith('_')]
         return pprint.pformat(dict(settings))
 
 

@@ -1,11 +1,11 @@
-from __future__ import print_function, division, absolute_import
+
 
 import unittest
 
 from test import temp_file, open_mock
 from textwrap import dedent
 
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 from orbach.config import Config, ConfigSection, MissingSectionError, MissingOptionError
 
@@ -26,7 +26,7 @@ class ConfigTest(unittest.TestCase):
     def test_get_attribute_unicode(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            self.assertIsInstance(conf.hello, unicode)
+            self.assertIsInstance(conf.hello, str)
 
     def test_bad_get(self):
         with temp_file(self.content) as t:
@@ -47,7 +47,7 @@ class ConfigTest(unittest.TestCase):
         with temp_file(self.content) as t:
             conf = Config(t)
             conf.foo = 'bar'
-            self.assertIsInstance(conf.foo, unicode)
+            self.assertIsInstance(conf.foo, str)
 
     def test_getboolean(self):
         boolean_conf = dedent("""
@@ -106,7 +106,7 @@ class ConfigTest(unittest.TestCase):
                 conf.use_x_sendfile = "False"
 
     def test_read_stream(self):
-        stream = dedent(u"""
+        stream = dedent("""
             [orbach]
             foo = baz
         """)
@@ -158,7 +158,7 @@ class ConfigWithSectionsTest(unittest.TestCase):
         with temp_file(self.content) as t:
             conf = Config(t)
             for k, v in conf:
-                self.assertTrue(isinstance(k, unicode))
+                self.assertTrue(isinstance(k, str))
                 self.assertTrue(isinstance(v, ConfigSection))
 
     def test_del_from_section(self):

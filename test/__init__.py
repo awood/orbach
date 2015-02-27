@@ -1,4 +1,4 @@
-from __future__ import print_function, division, absolute_import
+
 
 import os
 import sys
@@ -6,7 +6,7 @@ import tempfile
 
 from io import StringIO
 from contextlib import contextmanager
-from mock import mock_open, patch
+from unittest.mock import mock_open, patch
 from orbach.util import unicode_in, unicode_out, to_unicode
 
 

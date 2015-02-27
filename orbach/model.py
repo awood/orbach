@@ -1,4 +1,4 @@
-from __future__ import print_function, division, absolute_import
+
 
 from flask.ext.sqlalchemy import Model
 
@@ -14,8 +14,7 @@ class StandardAttributes():
     modified = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
 
 
-class User(Model, StandardAttributes):
-    __metaclass__ = DbMeta
+class User(Model, StandardAttributes, metaclass=DbMeta):
     __tablename__ = "users"
 
     username = Column(Unicode)

@@ -1,4 +1,4 @@
-from __future__ import print_function, division, absolute_import
+
 
 import logging
 import os
@@ -14,7 +14,7 @@ from io import StringIO
 
 from orbach.config import Config
 
-DEFAULT_CONFIG = dedent(u"""
+DEFAULT_CONFIG = dedent("""
 [orbach]
 debug = False
 logger_name = orbach
