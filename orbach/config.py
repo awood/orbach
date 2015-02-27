@@ -1,12 +1,9 @@
-
-
 import pprint
 
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 from flask import Flask
 
 from orbach.errors import OrbachError
-from orbach.util import unicode_in, unicode_out
 
 FLASK_RESERVED = list(Flask.default_config.keys()) + [
         'SQLALCHEMY_DATABASE_URI',
@@ -44,15 +41,15 @@ class Config(object):
     SECTION = "orbach"
 
     def __init__(self, conf):
-        """If the conf object send in has a readline method the configuration will
-        be pull from it as a stream.  If the object is a string, the string will be
+        """If the conf object sent in has a readline method the configuration will
+        be pulled from it as a stream.  If the object is a string, the string will be
         treated as a file to open and read from."""
-        self._parser = SafeConfigParser()
+        self._parser = ConfigParser()
 
         self._conf = conf
 
         if self._is_stream():
-            self._parser.readfp(conf)
+            self._parser.read_file(conf)
         else:
             self._parser.read(conf)
 
@@ -66,7 +63,6 @@ class Config(object):
     def _is_stream(self):
         return hasattr(self._conf, 'readline')
 
-    @unicode_in
     def __setattr__(self, name, value):
         # If they are setting the attribute in lowercase.
         # E.g. self.debug will throw an error but self.DEBUG will not
@@ -85,7 +81,6 @@ class Config(object):
                 k = k.upper()
             setattr(self, k, self._parser.get(self._section, k))
 
-    @unicode_out
     def __getattr__(self, name):
         """Called when accessing nonexistent attributes"""
         # By default, ConfigParser is agnostic about case, but we want to be picky when
@@ -112,7 +107,6 @@ class Config(object):
         except KeyError:
             raise MissingSectionError(key)
 
-    @unicode_in
     def __setitem__(self, key, value):
         self._child_sections[key] = value
 
@@ -121,7 +115,6 @@ class Config(object):
         self._parser.remove_section(key)
         self._persist()
 
-    @unicode_in
     def __contains__(self, item):
         return item in list(self._child_sections.keys())
 

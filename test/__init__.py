@@ -1,5 +1,3 @@
-
-
 import os
 import sys
 import tempfile
@@ -7,17 +5,15 @@ import tempfile
 from io import StringIO
 from contextlib import contextmanager
 from unittest.mock import mock_open, patch
-from orbach.util import unicode_in, unicode_out, to_unicode
 
 
 @contextmanager
-@unicode_in
 def temp_file(content, *args, **kwargs):
     try:
         kwargs['delete'] = False
         kwargs.setdefault('prefix', 'orbach')
         fn = tempfile.NamedTemporaryFile(*args, **kwargs)
-        fn.write(content)
+        fn.write(bytes(content, "utf-8"))
         fn.close()
         yield fn.name
     finally:
@@ -25,18 +21,16 @@ def temp_file(content, *args, **kwargs):
 
 
 @contextmanager
-@unicode_in
 def open_mock(content, **kwargs):
-    m = mock_open(read_data=content)
     content_out = StringIO()
-    with patch('__builtin__.open', m, create=True, **kwargs) as mo:
-        # mock_open doesn't provide readline() or write() so we do it ourselves.
-        # the unicode_in decorator will ensure content is UTF-8
+    m = mock_open(read_data=content)
+    with patch('__main__.open', m, create=True, **kwargs) as mo:
         stream = StringIO(content)
-        mo.readline = lambda: stream.readline()
-        mo.write = lambda x: content_out.write(to_unicode(x))
-        mo.content_out = lambda: content_out.getvalue()
-        yield mo
+        rv = mo.return_value
+        rv.write = lambda x: content_out.write(bytes(x, "utf-8"))
+        rv.content_out = lambda: content_out.getvalue()
+        rv.__iter__ = lambda x: iter(stream.readlines())
+        yield rv
 
 
 def assert_items_equals(self, a, b):
@@ -54,13 +48,11 @@ class Capture(object):
             self.stream = stream
             self.silent = silent
 
-        @unicode_in
         def write(self, data):
             self.buf.write(data)
             if not self.silent:
-                self.stream.write(data)
+                self.stream.write(bytes(data, "utf-8"))
 
-        @unicode_out
         def getvalue(self):
             return self.buf.getvalue()
 

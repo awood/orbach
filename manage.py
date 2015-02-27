@@ -1,7 +1,4 @@
 #! /usr/bin/env python
-
-from __future__ import print_function, division, absolute_import
-
 from logging import getLogger
 
 from flask.ext.script import Manager, Server, Shell

@@ -1,10 +1,5 @@
-
-
 from sqlalchemy import MetaData, event
 from sqlalchemy.engine import Engine
-from sqlalchemy.types import TypeDecorator, Unicode
-
-from orbach.util import to_unicode
 
 
 metadata_convention = {
@@ -22,14 +17,3 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
-
-
-class CoerceUTF8(TypeDecorator):
-    """Safely coerce Python bytestrings to Unicode
-    before passing off to the database."""
-
-    impl = Unicode
-
-    def process_bind_param(self, value, dialect):
-        value = to_unicode(value)
-        return value

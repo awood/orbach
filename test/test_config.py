@@ -1,11 +1,9 @@
-
-
 import unittest
 
 from test import temp_file, open_mock
 from textwrap import dedent
 
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 from orbach.config import Config, ConfigSection, MissingSectionError, MissingOptionError
 
@@ -38,7 +36,7 @@ class ConfigTest(unittest.TestCase):
         with temp_file(self.content) as t:
             conf = Config(t)
             conf.foo = 'bar'
-            parser = SafeConfigParser()
+            parser = ConfigParser()
             parser.read(t)
             self.assertTrue(parser.has_option(Config.SECTION, 'foo'))
             self.assertEquals('bar', conf.foo)
@@ -131,7 +129,7 @@ class ConfigWithSectionsTest(unittest.TestCase):
         with temp_file(self.content) as t:
             conf = Config(t)
             del(conf['other'])
-            parser = SafeConfigParser()
+            parser = ConfigParser()
             parser.read(t)
             self.assertFalse(parser.has_section('other'))
             with self.assertRaises(MissingSectionError):
@@ -165,7 +163,7 @@ class ConfigWithSectionsTest(unittest.TestCase):
         with temp_file(self.content) as t:
             conf = Config(t)
             del(conf['other'].foo)
-            parser = SafeConfigParser()
+            parser = ConfigParser()
             parser.read(t)
             self.assertFalse(parser.has_option('other', 'foo'))
             with self.assertRaises(MissingOptionError):
@@ -175,7 +173,7 @@ class ConfigWithSectionsTest(unittest.TestCase):
         with temp_file(self.content) as t:
             conf = Config(t)
             conf['other'].abc = 'xyz'
-            parser = SafeConfigParser()
+            parser = ConfigParser()
             parser.read(t)
             self.assertTrue(parser.has_option('other', 'abc'))
             self.assertEquals('xyz', conf['other'].abc)

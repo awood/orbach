@@ -1,6 +1,3 @@
-
-
-
 # General exception classes
 class OrbachError(Exception):
     """Base class for exceptions."""

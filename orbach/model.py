@@ -1,5 +1,3 @@
-
-
 from flask.ext.sqlalchemy import Model
 
 from sqlalchemy import Column, Integer, DateTime, Unicode, String

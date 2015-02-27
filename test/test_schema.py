@@ -1,10 +1,8 @@
-
-
 import unittest
 import os
 
 # We need to import this model to set up the foreign key pragma
-from orbach import model
+from orbach import alchemy_util
 
 from alembic.config import Config as AlembicConfig
 from alembic.context import EnvironmentContext
@@ -25,7 +23,7 @@ class SchemaTest(unittest.TestCase):
         config.set_main_option('sqlalchemy.url', 'sqlite://')
         script_dir = ScriptDirectory.from_config(config)
 
-        metadata = MetaData(naming_convention=model.metadata_convention)
+        metadata = MetaData(naming_convention=alchemy_util.metadata_convention)
 
         self.engine = engine_from_config(
             config.get_section(config.config_ini_section),

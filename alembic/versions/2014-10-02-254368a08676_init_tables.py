@@ -19,11 +19,14 @@ import bcrypt
 def id():
     return sa.Column('id', sa.Integer, primary_key=True)
 
+
 def created():
     return sa.Column('created', sa.DateTime, server_default=sa.func.now())
 
+
 def modified():
     return sa.Column('modified', sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now())
+
 
 def upgrade():
     current_context = op.get_context()
@@ -40,7 +43,7 @@ def upgrade():
     roles.create(op.get_bind())
 
     op.bulk_insert(roles, [
-            {'id': 1, 'name': u'ADMIN', 'description': u'Administrator'},
+            {'id': 1, 'name': 'ADMIN', 'description': 'Administrator'},
         ],
         multiinsert=False
     )
@@ -55,9 +58,9 @@ def upgrade():
     )
     users.create(op.get_bind())
 
-    password = bcrypt.hashpw('admin', bcrypt.gensalt())
+    password = bcrypt.hashpw(bytes('admin', 'utf-8'), bcrypt.gensalt())
     op.bulk_insert(users, [
-            {'id': 1, 'username': u'admin', 'password': password, 'role_id': '1'},
+            {'id': 1, 'username': 'admin', 'password': password, 'role_id': '1'},
         ],
         multiinsert=False
     )
