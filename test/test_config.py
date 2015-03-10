@@ -3,9 +3,9 @@ import unittest
 from test import temp_file, open_mock
 from textwrap import dedent
 
-from configparser import ConfigParser
+from configparser import ConfigParser, NoOptionError, NoSectionError
 
-from orbach.config import Config, ConfigSection, MissingSectionError, MissingOptionError
+from orbach.config import Config
 
 
 class ConfigTest(unittest.TestCase):
@@ -19,33 +19,22 @@ class ConfigTest(unittest.TestCase):
     def test_get_attribute(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            self.assertEquals(conf.hello, 'world')
-
-    def test_get_attribute_unicode(self):
-        with temp_file(self.content) as t:
-            conf = Config(t)
-            self.assertIsInstance(conf.hello, str)
+            self.assertEquals(conf['hello'], 'world')
 
     def test_bad_get(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            with self.assertRaises(MissingOptionError):
-                conf.does_not_exist
+            with self.assertRaises(NoOptionError):
+                conf['blah']
 
     def test_set(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            conf.foo = 'bar'
+            conf['foo'] = 'bar'
             parser = ConfigParser()
             parser.read(t)
             self.assertTrue(parser.has_option(Config.SECTION, 'foo'))
-            self.assertEquals('bar', conf.foo)
-
-    def test_set_unicode(self):
-        with temp_file(self.content) as t:
-            conf = Config(t)
-            conf.foo = 'bar'
-            self.assertIsInstance(conf.foo, str)
+            self.assertEquals('bar', conf['foo'])
 
     def test_getboolean(self):
         boolean_conf = dedent("""
@@ -66,42 +55,56 @@ class ConfigTest(unittest.TestCase):
         boolean_conf = dedent("""
             [orbach]
             x = 123
+            y = 01
         """)
         with temp_file(boolean_conf) as t:
             conf = Config(t)
             self.assertEquals(123, conf.get_int('x'))
+            self.assertEqual(1, conf.get_int('y'))
 
-    def test_to_boolean(self):
-        boolean_conf = dedent("""
+    def test_objectify_flask_options(self):
+        flask_conf = dedent("""
             [orbach]
-            x = True
-            y = False
-            a = on
-            b = off
+            x = y
+
+            [flask]
+            DEBUG = True
+            SIZE = 3
+            NAME = hi
         """)
-        with temp_file(boolean_conf) as t:
-            conf = Config(t)
-            conf.to_boolean('x', 'y', 'a', 'b')
-            self.assertEquals(True, conf.x)
-            self.assertEquals(True, conf.a)
-            self.assertEquals(False, conf.y)
-            self.assertEquals(False, conf.b)
+        with temp_file(flask_conf) as t:
+            conf = Config(t).flask_config()
+            self.assertEquals(True, conf['DEBUG'])
+            self.assertEquals(3, conf['SIZE'])
+            self.assertEquals('hi', conf['NAME'])
+
+    def test_objectify_does_not_cast_integers_to_bools(self):
+        flask_conf = dedent("""
+            [orbach]
+            x = y
+
+            [flask]
+            DEBUG = 0
+            SIZE = 1
+        """)
+        with temp_file(flask_conf) as t:
+            conf = Config(t).flask_config()
+            self.assertEqual(0, conf['DEBUG'])
+            self.assertEqual(1, conf['SIZE'])
 
     def test_reserved_options(self):
         reserved = dedent("""
             [orbach]
+            WRONG = this
+
+            [flask]
             DEBUG = True
             USE_X_SENDFILE = True
         """)
         with temp_file(reserved) as t:
             conf = Config(t)
-            self.assertEquals("True", conf.DEBUG)
-            with self.assertRaises(MissingOptionError):
-                conf.debug
-
-            self.assertEquals("True", conf.USE_X_SENDFILE)
-            with self.assertRaises(AttributeError):
-                conf.use_x_sendfile = "False"
+            with self.assertRaises(NoOptionError):
+                conf['WRONG']
 
     def test_read_stream(self):
         stream = dedent("""
@@ -110,7 +113,20 @@ class ConfigTest(unittest.TestCase):
         """)
         with open_mock(stream) as m:
             conf = Config(m)
-            self.assertEquals("baz", conf.foo)
+            self.assertEquals("baz", conf['foo'])
+
+    def test_contains(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            self.assertTrue("hello" in conf)
+            self.assertFalse("blah" in conf)
+
+    def test_iter(self):
+        with temp_file(self.content) as t:
+            conf = Config(t)
+            for k, v in conf:
+                self.assertTrue(k in ["hello", "goodbye"])
+                self.assertEqual("world", v)
 
 
 class ConfigWithSectionsTest(unittest.TestCase):
@@ -128,55 +144,36 @@ class ConfigWithSectionsTest(unittest.TestCase):
     def test_del(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            del(conf['other'])
+            conf.delete_section('other')
             parser = ConfigParser()
             parser.read(t)
             self.assertFalse(parser.has_section('other'))
-            with self.assertRaises(MissingSectionError):
-                conf['other']
-
-    def test_contains(self):
-        with temp_file(self.content) as t:
-            conf = Config(t)
-            self.assertTrue('other' in conf)
-            self.assertFalse('xyz' in conf)
-
-    def test_len(self):
-        with temp_file(self.content) as t:
-            conf = Config(t)
-            self.assertEquals(1, len(conf))
+            with self.assertRaises(NoSectionError):
+                conf.get_section('other')
 
     def test_section_access(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            self.assertEquals('bar', conf['other'].foo)
-            self.assertEquals('qux', conf['other'].baz)
-
-    def test_iter(self):
-        with temp_file(self.content) as t:
-            conf = Config(t)
-            for k, v in conf:
-                self.assertTrue(isinstance(k, str))
-                self.assertTrue(isinstance(v, ConfigSection))
+            self.assertEquals('bar', conf.get_section('other')['foo'])
 
     def test_del_from_section(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            del(conf['other'].foo)
+            del(conf.get_section('other')['foo'])
             parser = ConfigParser()
             parser.read(t)
             self.assertFalse(parser.has_option('other', 'foo'))
-            with self.assertRaises(MissingOptionError):
-                conf['other'].foo
+            with self.assertRaises(NoOptionError):
+                conf.get_section('other')['foo']
 
     def test_set_to_section(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            conf['other'].abc = 'xyz'
+            conf.get_section('other')['abc'] = 'xyz'
             parser = ConfigParser()
             parser.read(t)
             self.assertTrue(parser.has_option('other', 'abc'))
-            self.assertEquals('xyz', conf['other'].abc)
+            self.assertEquals('xyz', conf.get_section('other')['abc'])
 
     def test_other_sections(self):
         with temp_file(self.content) as t:
@@ -187,5 +184,5 @@ class ConfigWithSectionsTest(unittest.TestCase):
     def test_missing_section(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            with self.assertRaises(MissingSectionError):
-                conf['missing']
+            with self.assertRaises(NoSectionError):
+                conf.get_section('missing')

@@ -14,16 +14,18 @@ from orbach.config import Config
 
 DEFAULT_CONFIG = dedent("""
 [orbach]
-debug = False
-logger_name = orbach
-json_as_asii = False
-sqlalchemy_database_uri = sqlite:///%(current_dir)s
+
+[flask]
+DEBUG = False
+TESTING = False
+LOGGER_NAME = orbach
+JSON_AS_ASII = False
+SQLALCHEMY_DATABASE_URI = sqlite:///%(current_dir)s
 """) % {
     "current_dir": os.path.join(os.path.abspath(os.path.dirname(__file__)), "orbach.db")
 }
 
 app = Flask(__name__.split('.')[0])
-assets = Environment(app)
 
 LOG_FORMAT = '%(asctime)s [%(name)s(%(module)s:%(lineno)d)] %(message)s'
 
@@ -87,14 +89,17 @@ def read_config(config_file):
     except Exception:
         raise IOError("Failed to open %s" % config_file)
 
-    config = Config(stream)
+    orbach_config = Config(stream)
     default_config = Config(StringIO(DEFAULT_CONFIG))
 
-    for item in ["DEBUG"]:
-        config.to_boolean(item)
-        default_config.to_boolean(item)
+    for k, v in default_config:
+        if k not in orbach_config:
+            orbach_config[k] = v
 
-    return (default_config, config)
+    flask_config = default_config.flask_config().copy()
+    flask_config.update(orbach_config.flask_config())
+
+    return (flask_config, orbach_config)
 
 
 def bundle_js(assets):
@@ -163,19 +168,20 @@ def init_db(app):
     return db
 
 
-def init_app(app, config_list):
+def init_app(app, config):
     OrbachLog.setup(app)
 
-    # TODO The default config should be read here not earlier
+    flask_config, orbach_config = config
 
-    for c in config_list:
-        app.config.from_object(c)
-        app.logger.debug("Loaded %s" % c)
+    app.config.update(flask_config)
+
+    app.config.orbach = orbach_config
     app.logger.debug("Running with configuration: %s" % app.config)
 
     app.db = init_db(app)
 
-    assets.debug = app.debug
+    assets = Environment(app)
+    assets.debug = app.config['DEBUG']
     assets.url = app.static_url_path
     assets.directory = app.static_folder
 
@@ -193,5 +199,4 @@ def init_app(app, config_list):
 
 
 def init_from_file(config_file):
-    (default_config, config) = read_config(config_file)
-    return init_app(app, [default_config, config])
+    return init_app(app, read_config(config_file))
