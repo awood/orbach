@@ -113,6 +113,7 @@ def upgrade():
 
 
 def downgrade():
+    op.drop_table("covers")
     op.drop_table("pictures")
     op.drop_table("galleries")
     op.drop_table("users")

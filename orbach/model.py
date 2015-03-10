@@ -17,3 +17,23 @@ class User(Model, StandardAttributes, metaclass=DbMeta):
 
     username = Column(Unicode)
     password = Column(String)
+
+
+class Role(Model, StandardAttributes, metaclass=DbMeta):
+    __tablename__ = "roles"
+
+
+class Gallery(Model, StandardAttributes, metaclass=DbMeta):
+    __tablename__ = "galleries"
+
+
+class ImageFile(Model, StandardAttributes, metaclass=DbMeta):
+    __tablename__ = "image_files"
+
+
+class Picture(Model, StandardAttributes, metaclass=DbMeta):
+    __tablename__ = "pictures"
+
+
+class Cover(Model, StandardAttributes, metaclass=DbMeta):
+    __tablename__ = "covers"
