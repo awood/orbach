@@ -1,7 +1,7 @@
-import orbach.alchemy_util
+from orbach.alchemy_util import metadata_convention
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, MetaData
 from logging.config import fileConfig
 
 # this is the Alembic Config object, which provides
@@ -11,12 +11,6 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
-
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = orbach.alchemy_util.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -36,6 +30,7 @@ def run_migrations_offline():
     script output.
 
     """
+    target_metadata = MetaData(naming_convention=metadata_convention)
     url = config.get_main_option("sqlalchemy.url")
     context.configure(url=url, target_metadata=target_metadata)
 
@@ -50,6 +45,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    target_metadata = MetaData(naming_convention=metadata_convention)
     engine = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix='sqlalchemy.',

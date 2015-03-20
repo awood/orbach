@@ -1,7 +1,7 @@
 import os
+
 from tempfile import NamedTemporaryFile
 
-from flask import Flask
 from flask.ext.testing import TestCase
 
 from alembic import command
@@ -23,7 +23,7 @@ class OrbachTest(TestCase):
         # See http://stackoverflow.com/questions/27910829 for someone with the same
         # issue
         self.db_file = NamedTemporaryFile(delete=False, prefix="orbach_test_db_").name
-        alembic_config = dedent("""
+        alembic_config_content = dedent("""
             [alembic]
             sqlalchemy.url = sqlite:///{temp_db_file}
             file_template = %%(year)d-%%(month).2d-%%(day).2d-%%(rev)s_%%(slug)s
@@ -63,7 +63,7 @@ class OrbachTest(TestCase):
             [formatter_generic]
             format = %(levelname)-5.5s [%(name)s] %(message)s
         """).format(temp_db_file=self.db_file)
-        with temp_file(alembic_config) as config_file:
+        with temp_file(alembic_config_content) as config_file:
             alembic_config = AlembicConfig(config_file)
             command.upgrade(alembic_config, "head")
 
@@ -88,7 +88,6 @@ class OrbachTest(TestCase):
         return app
 
     def tearDown(self):
-        # Need to clear Alembic context here.  Problem with double loading env.py
         self.app.db.session.remove()
         os.unlink(self.db_file)
         os.unlink(self.config_file)
