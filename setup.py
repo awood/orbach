@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import os
+import re
 
 from glob import glob
 
@@ -9,6 +10,20 @@ from setuptools import setup, find_packages
 from distutils import log
 from distutils.command.clean import clean as _clean
 from distutils.dir_util import remove_tree
+from distutils.version import StrictVersion
+
+VERSIONFILE = "orbach/version.py"
+
+# Why do this instead of just importing the module?
+# See http://stackoverflow.com/a/7071358
+line = open(VERSIONFILE, "r").read()
+# Getting multiple captures from repetition doesn't work.  See http://stackoverflow.com/a/4651893
+VERSION_INFO_RE = r"^__version_info__\s*=\s*\(((['\"]\S+['\"],?\s*)+)\)"
+m = re.search(VERSION_INFO_RE, line, re.M)
+if m:
+    version_string = ".".join(re.findall(r"\b\S+\b", m.group(1)))
+else:
+    raise RuntimeError("Unable to find version string in %s." % VERSIONFILE)
 
 
 class clean(_clean):
@@ -55,9 +70,11 @@ tests_require = [
     'Flask-Testing >= 0.4.2',
 ] + install_requires
 
+version = StrictVersion("1.0.0")
+
 setup(
     name='Orbach',
-    version='1.0',
+    version=version_string,
     author='Alex Wood',
     description='A simple gallery display tool',
     license='MIT',

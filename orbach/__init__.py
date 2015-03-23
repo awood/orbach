@@ -201,6 +201,9 @@ def init_app(app, config):
     bundle_js(assets)
     bundle_css(assets)
 
+    from orbach.api import api as api_blueprint
+    app.register_blueprint(api_blueprint, url_prefix="/api/v1")
+
     from orbach.gallery import gallery as gallery_blueprint
     app.register_blueprint(gallery_blueprint)
 
