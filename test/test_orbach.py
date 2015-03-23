@@ -1,6 +1,6 @@
 import os
 
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 from flask.ext.testing import TestCase
 
@@ -70,15 +70,19 @@ class OrbachTest(TestCase):
     def create_app(self):
         self.run_alembic()
 
+        self.application_root = TemporaryDirectory(prefix="orbach_test_root_").name
         test_config = dedent("""
             [orbach]
+            application_root = {application_root}
 
             [flask]
             DEBUG = False
             TESTING = True
             LOGGER_NAME = orbach
             SQLALCHEMY_DATABASE_URI = sqlite:///{temp_db_file}
-        """).format(temp_db_file=self.db_file)
+        """).format(
+            application_root=self.application_root,
+            temp_db_file=self.db_file)
 
         self.config_file = NamedTemporaryFile(delete=False, prefix="orbach_test_config_").name
         with open(self.config_file, 'w') as f:

@@ -10,10 +10,13 @@ from logging.handlers import RotatingFileHandler
 from textwrap import dedent
 from io import StringIO
 
+from pathlib import Path
+
 from orbach.config import Config
 
 DEFAULT_CONFIG = dedent("""
 [orbach]
+application_root = /var/lib/orbach
 
 [flask]
 DEBUG = False
@@ -168,6 +171,15 @@ def init_db(app):
     return db
 
 
+def init_root_dir(app):
+    p = Path(app.config.orbach["application_root"])
+    try:
+        Path.mkdir(p, parents=True)
+    except FileExistsError:
+        pass
+    app.logger.info("Working in %s" % p)
+
+
 def init_app(app, config):
     OrbachLog.setup(app)
 
@@ -179,6 +191,7 @@ def init_app(app, config):
     app.logger.debug("Running with configuration: %s" % app.config)
 
     app.db = init_db(app)
+    init_root_dir(app)
 
     assets = Environment(app)
     assets.debug = app.config['DEBUG']
