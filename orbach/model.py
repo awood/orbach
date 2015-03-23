@@ -18,6 +18,11 @@ class User(Model, StandardAttributes, metaclass=DbMeta):
     username = Column(Unicode)
     password = Column(String)
 
+    def to_json(self):
+        return {
+            "username": self.username,
+        }
+
 
 class Role(Model, StandardAttributes, metaclass=DbMeta):
     __tablename__ = "roles"
@@ -25,6 +30,17 @@ class Role(Model, StandardAttributes, metaclass=DbMeta):
 
 class Gallery(Model, StandardAttributes, metaclass=DbMeta):
     __tablename__ = "galleries"
+
+    name = Column(Unicode)
+    description = Column(Unicode)
+    parent = Column(Integer)
+
+    def to_json(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "parent": self.parent,
+        }
 
 
 class ImageFile(Model, StandardAttributes, metaclass=DbMeta):

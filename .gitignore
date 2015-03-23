@@ -3,6 +3,7 @@
 *.log
 *.db
 
+MANIFEST
 build/
 dist/
 .webassets-cache/

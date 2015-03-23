@@ -1,7 +1,7 @@
 import logging
 import os
 
-from flask import Flask
+from flask import Flask, json
 from flask.ext.assets import Environment, Bundle
 from flask.ext.sqlalchemy import SQLAlchemy, Model, _BoundDeclarativeMeta
 
@@ -30,7 +30,7 @@ SQLALCHEMY_DATABASE_URI = sqlite:///%(current_dir)s
 
 app = Flask(__name__.split('.')[0])
 
-LOG_FORMAT = '%(asctime)s [%(name)s(%(module)s:%(lineno)d)] %(message)s'
+LOG_FORMAT = '%(asctime)s [%(levelname)s] (%(name)s:%(module)s:%(lineno)d) %(message)s'
 
 
 class OrbachLog(object):
@@ -44,6 +44,13 @@ class OrbachLog(object):
         app.logger.addHandler(handler)
 
 
+class OrbachEncoder(json.JSONEncoder):
+    def default(self, o):
+        if hasattr(o, "to_json"):
+            return o.to_json()
+        return super().default(self, o)
+
+
 class DbMeta(_BoundDeclarativeMeta):
     """Python meta-class for creating the SQLAlchemy declarative base
 
@@ -51,7 +58,7 @@ class DbMeta(_BoundDeclarativeMeta):
     in it that bind to the database context.
 
     The recommended way to do things is to define a "db" at the module level and then all
-    model object inherit from that.  Unfortunately, we need to read the configuration
+    model objects inherit from that.  Unfortunately, we need to read the configuration
     and do all other stuff first.  Plus, I don't like doing things like that at the module
     level: it makes testing difficult.
 
@@ -192,6 +199,8 @@ def init_app(app, config):
 
     app.db = init_db(app)
     init_root_dir(app)
+
+    app.json_encoder = OrbachEncoder
 
     assets = Environment(app)
     assets.debug = app.config['DEBUG']
