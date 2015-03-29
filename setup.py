@@ -2,13 +2,18 @@
 
 import os
 import re
+import subprocess
 
 from glob import glob
 
 from setuptools import setup, find_packages
 
-from distutils import log
+from distutils import cmd, log
 from distutils.command.clean import clean as _clean
+from distutils.command.install_data import install_data as _install_data
+from distutils.command.build import build as _build
+from distutils.command.build_py import build_py
+
 from distutils.dir_util import remove_tree
 from distutils.version import StrictVersion
 
@@ -43,8 +48,101 @@ class clean(_clean):
         _clean.run(self)
 
 
+class keys(build_py):
+    description = 'Create a new keys file for gettext'
+    user_options = [
+        ('keys-file=', 'k', "keys file to write to"),
+    ]
+    boolean_options = []
+    negative_opt = {}
+
+    def initialize_options(self):
+        super().initialize_options()
+        self.keys_file = os.path.join(os.curdir, "po", "keys.pot")
+
+    def finalize_options(self):
+        super().finalize_options()
+
+    def run(self):
+        po_list = os.path.join(os.curdir, "po", "POTFILES.in")
+        with open(po_list, "wt") as f:
+            for source_file in self.get_source_files():
+                f.write("%s\n" % source_file)
+        cmd = ["xgettext", "-f", po_list, "-o", self.keys_file]
+        rc = subprocess.call(cmd)
+        if rc != 0:
+            raise RuntimeError("xgettext failed")
+
+
+# Courtesy http://wiki.maemo.org/Internationalize_a_Python_application
+class build_trans(cmd.Command):
+    description = 'Compile .po files into .mo files'
+
+    user_options = [
+        ('build-base', 'b', "build base directory"),
+        ('in-place', 'i', "build .mo files in place"),
+    ]
+    boolean_options = ['in-place']
+
+    def initialize_options(self):
+        self.build_base = None
+        self.in_place = False
+
+    def finalize_options(self):
+        self.set_undefined_options('build', ('build_base', 'build_base'))
+
+    def compile(self, src, dest):
+        log.info("Compiling %s" % src)
+        cmd = ['msgfmt', '-c', '--statistics', '-o', dest, src]
+        rc = subprocess.call(cmd)
+        if rc != 0:
+            raise RuntimeError("msgfmt failed for %s to %s" % (src, dest))
+
+    def run(self):
+        po_dir = os.path.join(os.curdir, 'po')
+        for path, names, filenames in os.walk(po_dir):
+            for f in filenames:
+                if f.endswith('.po'):
+                    lang = f[:-3]
+                    src = os.path.join(path, f)
+                    if self.in_place:
+                        dest_path = os.path.join(os.curdir, 'locale', lang, 'LC_MESSAGES')
+                    else:
+                        dest_path = os.path.join(self.build_base, 'locale', lang, 'LC_MESSAGES')
+                    dest = os.path.join(dest_path, 'orbach.mo')
+                    if not os.path.exists(dest_path):
+                        os.makedirs(dest_path)
+                    if not os.path.exists(dest):
+                        self.compile(src, dest)
+                    else:
+                        src_mtime = os.stat(src)[8]
+                        dest_mtime = os.stat(dest)[8]
+                        if src_mtime > dest_mtime:
+                            self.compile(src, dest)
+
+
+class build(_build):
+    sub_commands = _build.sub_commands + [('build_trans', None)]
+
+    def run(self):
+        _build.run(self)
+
+
+class install_data(_install_data):
+    def run(self):
+        for lang in os.listdir('build/locale/'):
+            lang_dir = os.path.join('share', 'locale', lang, 'LC_MESSAGES')
+            lang_file = os.path.join('build', 'locale', lang, 'LC_MESSAGES', 'orbach.mo')
+            self.data_files.append((lang_dir, [lang_file]))
+        _install_data.run(self)
+
+
 cmdclass = {
     'clean': clean,
+    'build': build,
+    'build_trans': build_trans,
+    'install_data': install_data,
+    'keys': keys,
 }
 
 install_requires = [
