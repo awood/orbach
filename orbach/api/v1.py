@@ -1,9 +1,10 @@
+from orbach import app
 from orbach.api import api
 from orbach.controller import GalleryController, UserController
 from orbach.version import __version__
 
 from flask.views import MethodView
-from flask import jsonify
+from flask import jsonify, json, request
 
 
 @api.route('/')
@@ -11,24 +12,28 @@ def status():
     return jsonify({"API Version": __version__})
 
 
-def register_api(view, endpoint, url, pk='id', pk_type='int'):
-    view_func = view.as_view(endpoint)
-    api.add_url_rule(url, defaults={pk: None}, view_func=view_func, methods=['GET'])
-    api.add_url_rule(url, view_func=view_func, methods=['POST'])
-    api.add_url_rule('%s<%s:%s>' % (url, pk_type, pk), view_func=view_func,
-                     methods=['GET', 'PUT', 'DELETE'])
-
-
-def user_required(func):
+def authn_required(func):
     def decorator(*args, **kwargs):
         # TODO if not authenticated
         return func(*args, **kwargs)
     return decorator
 
 
-class GalleryApi(MethodView):
-    decorators = [user_required]
+def register_api(view, endpoint, url, pk='id', pk_type='int', authn=True):
+    view_func = view.as_view(endpoint)
 
+    # TODO Maybe make authn finer-grain by sending in a list with HTTP verbs
+    # and only apply the decorator to URL rules using those verbs
+#    if authn:
+        #view_func = authn_required(view_func)
+
+    api.add_url_rule(url, defaults={pk: None}, view_func=view_func, methods=['GET'])
+    api.add_url_rule(url, view_func=view_func, methods=['POST'])
+    api.add_url_rule('%s<%s:%s>' % (url, pk_type, pk), view_func=view_func,
+                     methods=['GET', 'PUT', 'DELETE'])
+
+
+class GalleryApi(MethodView):
     def get(self, gal_id):
         if gal_id is None:
             res = {"galleries": GalleryController.get_all()}
@@ -37,11 +42,13 @@ class GalleryApi(MethodView):
         return jsonify(res)
 
     def post(self):
-        res = GalleryController.create(None)
+        post_data = request.get_json()
+        res = GalleryController.create(post_data)
         return jsonify({"gallery": res})
 
     def put(self, gal_id):
-        res = GalleryController(gal_id).update()
+        post_data = request.get_json()
+        res = GalleryController(gal_id).update(post_data)
         return jsonify({"gallery": res})
 
     def delete(self, gal_id):
@@ -56,8 +63,6 @@ register_api(GalleryApi, "gallery_api", "/galleries/", pk="gal_id")
 
 
 class UserApi(MethodView):
-    decorators = [user_required]
-
     def get(self, user_id):
         if user_id is None:
             res = {"users": UserController.get_all()}
@@ -66,11 +71,13 @@ class UserApi(MethodView):
         return jsonify(res)
 
     def post(self):
-        res = UserController.create(None)
+        post_data = request.get_json()
+        res = UserController.create(post_data)
         return jsonify({"user": res})
 
     def put(self, user_id):
-        res = UserController(user_id).update()
+        post_data = request.get_json()
+        res = UserController(user_id).update(post_data)
         return jsonify({"user": res})
 
     def delete(self, user_id):
