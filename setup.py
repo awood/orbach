@@ -52,19 +52,23 @@ class keys(build_py):
     description = 'Create a new keys file for gettext'
     user_options = [
         ('keys-file=', 'k', "keys file to write to"),
+        ('merge', 'm', "run msgmerge on po files [default]"),
+        ('no-merge', None, "don't run msgmerge on po files"),
     ]
-    boolean_options = []
-    negative_opt = {}
+    boolean_options = ['merge']
+    negative_opt = {'no-merge': 'merge'}
 
     def initialize_options(self):
         super().initialize_options()
         self.keys_file = os.path.join(os.curdir, "po", "keys.pot")
+        self.merge = True
 
     def finalize_options(self):
         super().finalize_options()
 
     def run(self):
-        po_list = os.path.join(os.curdir, "po", "POTFILES.in")
+        po_dir = os.path.join(os.curdir, "po")
+        po_list = os.path.join(po_dir, "POTFILES.in")
         with open(po_list, "wt") as f:
             for source_file in self.get_source_files():
                 f.write("%s\n" % source_file)
@@ -72,6 +76,14 @@ class keys(build_py):
         rc = subprocess.call(cmd)
         if rc != 0:
             raise RuntimeError("xgettext failed")
+
+        if self.merge:
+            for f in glob(os.path.join(po_dir, '*.po')):
+                log.info("Merging %s" % os.path.basename(f))
+                cmd = ["msgmerge", "-N", "--backup", "none", "-U", f, self.keys_file]
+                rc = subprocess.call(cmd)
+                if rc != 0:
+                    raise RuntimeError("msgmerge failed for %s" % os.path.basename(f))
 
 
 # Courtesy http://wiki.maemo.org/Internationalize_a_Python_application
