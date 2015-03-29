@@ -1,5 +1,7 @@
 import logging
 import os
+import random
+import string
 
 from flask import Flask, json
 from flask.ext.assets import Environment, Bundle
@@ -24,8 +26,11 @@ TESTING = False
 LOGGER_NAME = orbach
 JSON_AS_ASII = False
 SQLALCHEMY_DATABASE_URI = sqlite:///%(current_dir)s
+SECRET_KEY = %(secret_key)s
+SESSION_COOKIE_NAME = orbach_session
 """) % {
-    "current_dir": os.path.join(os.path.abspath(os.path.dirname(__file__)), "orbach.db")
+    "current_dir": os.path.join(os.path.abspath(os.path.dirname(__file__)), "orbach.db"),
+    "secret_key": ''.join(random.choice(string.ascii_letters) for i in range(25)),
 }
 
 app = Flask(__name__.split('.')[0])
@@ -93,6 +98,12 @@ class DbMeta(_BoundDeclarativeMeta):
         return super(DbMeta, cls).__new__(cls, name, bases, dct)
 
 
+def validate_config(flask_config, orbach_config):
+    if "SECRET_KEY" not in flask_config:
+        print("*** Please specify a SECRET_KEY configuration option.  "
+            "Auto-generating one for now")
+
+
 def read_config(config_file):
     try:
         stream = open(config_file, 'r')
@@ -101,6 +112,8 @@ def read_config(config_file):
 
     orbach_config = Config(stream)
     default_config = Config(StringIO(DEFAULT_CONFIG))
+
+    validate_config(orbach_config.flask_config(), orbach_config)
 
     for k, v in default_config:
         if k not in orbach_config:
@@ -191,10 +204,10 @@ def init_app(app, config):
     OrbachLog.setup(app)
 
     flask_config, orbach_config = config
-
+    validate_config(flask_config, orbach_config)
     app.config.update(flask_config)
-
     app.config.orbach = orbach_config
+
     app.logger.debug("Running with configuration: %s" % app.config)
 
     app.db = init_db(app)
