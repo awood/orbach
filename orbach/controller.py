@@ -1,5 +1,3 @@
-from orbach import app
-
 from orbach.model import Gallery, User
 
 

@@ -33,12 +33,12 @@ class OrbachTest(TestCase):
             keys = root,sqlalchemy,alembic
 
             [logger_sqlalchemy]
-            level = INFO
+            level = WARN
             handlers =
             qualname = sqlalchemy.engine
 
             [logger_alembic]
-            level = INFO
+            level = WARN
             handlers =
             qualname = alembic
 
@@ -80,6 +80,7 @@ class OrbachTest(TestCase):
             TESTING = True
             LOGGER_NAME = orbach
             SQLALCHEMY_DATABASE_URI = sqlite:///{temp_db_file}
+            SECRET_KEY = testing
         """).format(
             application_root=self.application_root,
             temp_db_file=self.db_file)
@@ -96,8 +97,14 @@ class OrbachTest(TestCase):
         os.unlink(self.db_file)
         os.unlink(self.config_file)
 
-    def test_x(self):
-        pass
 
-    def test_y(self):
-        pass
+class TestI18n(OrbachTest):
+    def test_i18n(self):
+        req = {
+            'path': '/api/v1/',
+            'headers': [("Accept-Language", "fr")],
+        }
+        resp = self.client.get(**req)
+        self.assert_200(resp)
+        self.assertIn("Voila", resp.json)
+        self.assertEqual("fr", resp.json['Voila'])

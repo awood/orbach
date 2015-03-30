@@ -5,6 +5,7 @@ import string
 
 from flask import Flask, json
 from flask.ext.assets import Environment, Bundle
+from flask.ext.babel import Babel
 from flask.ext.sqlalchemy import SQLAlchemy, Model, _BoundDeclarativeMeta
 
 from logging.handlers import RotatingFileHandler
@@ -15,6 +16,9 @@ from io import StringIO
 from pathlib import Path
 
 from orbach.config import Config
+from orbach.util import get_locale, get_timezone
+
+LOG_FORMAT = '%(asctime)s [%(levelname)s] (%(name)s:%(module)s:%(lineno)d) %(message)s'
 
 DEFAULT_CONFIG = dedent("""
 [orbach]
@@ -33,9 +37,8 @@ SESSION_COOKIE_NAME = orbach_session
     "secret_key": ''.join(random.choice(string.ascii_letters) for i in range(25)),
 }
 
-app = Flask(__name__.split('.')[0])
-
-LOG_FORMAT = '%(asctime)s [%(levelname)s] (%(name)s:%(module)s:%(lineno)d) %(message)s'
+app_name = __name__.split('.')[0]
+app = Flask(app_name)
 
 
 class OrbachLog(object):
@@ -202,6 +205,14 @@ def init_db(app):
     return db
 
 
+def init_i18n(app):
+    babel = Babel(app)
+    babel.localeselector(get_locale)
+    babel.timezoneselector(get_timezone)
+    app.logger.debug("Default Locale: %s" % babel.default_locale)
+    app.logger.debug("Loaded translations: %s" % list(map(str, babel.list_translations())))
+
+
 def init_root_dir(app):
     p = Path(app.config.orbach["application_root"])
     try:
@@ -221,6 +232,7 @@ def init_app(app, config):
 
     app.logger.debug("Running with configuration: %s" % app.config)
 
+    init_i18n(app)
     app.db = init_db(app)
     init_root_dir(app)
 

@@ -6,7 +6,7 @@ from sqlalchemy import func
 from orbach import DbMeta
 
 
-class StandardAttributes():
+class StandardAttributes(object):
     id = Column(Integer, primary_key=True)
     created = Column(DateTime, server_default=func.now())
     modified = Column(DateTime, server_default=func.now(), server_onupdate=func.now())

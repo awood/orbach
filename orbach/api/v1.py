@@ -1,15 +1,19 @@
-from orbach import app
 from orbach.api import api
 from orbach.controller import GalleryController, UserController
 from orbach.version import __version__
 
 from flask.views import MethodView
-from flask import jsonify, json, request
+from flask import jsonify, request
+from flask.ext.babel import _, get_locale
 
 
 @api.route('/')
 def status():
-    return jsonify({"API Version": __version__})
+    return jsonify({
+        _("Application Version"): __version__,
+        _("API Version"): "1.0",
+        _("Request Locale"): str(get_locale()),
+    })
 
 
 def authn_required(func):
@@ -20,17 +24,13 @@ def authn_required(func):
 
 
 def register_api(view, endpoint, url, pk='id', pk_type='int', authn=True):
-    view_func = view.as_view(endpoint)
-
     # TODO Maybe make authn finer-grain by sending in a list with HTTP verbs
     # and only apply the decorator to URL rules using those verbs
-#    if authn:
-        #view_func = authn_required(view_func)
-
+    view_func = view.as_view(endpoint)
     api.add_url_rule(url, defaults={pk: None}, view_func=view_func, methods=['GET'])
     api.add_url_rule(url, view_func=view_func, methods=['POST'])
     api.add_url_rule('%s<%s:%s>' % (url, pk_type, pk), view_func=view_func,
-                     methods=['GET', 'PUT', 'DELETE'])
+        methods=['GET', 'PUT', 'DELETE'])
 
 
 class GalleryApi(MethodView):
