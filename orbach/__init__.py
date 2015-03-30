@@ -53,7 +53,7 @@ class OrbachEncoder(json.JSONEncoder):
     def default(self, o):
         if hasattr(o, "to_json"):
             return o.to_json()
-        return super().default(self, o)
+        return super().default(o)
 
 
 class DbMeta(_BoundDeclarativeMeta):
@@ -78,10 +78,13 @@ class DbMeta(_BoundDeclarativeMeta):
 
     Another solution would be
 
+    import builtins
+    ...
+
     def start_app(self):
         ...
         db = SQLAlchemy(app)
-        __builtin__.__dict__["my_db"] = db
+        builtins.__dict__["my_db"] = db
 
     And then all model classes could inherit from "my_db.Model".  This solution has the
     disadvantage of throwing warnings in static analysis since the "my_db" builtin is not
@@ -90,12 +93,20 @@ class DbMeta(_BoundDeclarativeMeta):
     db = None
 
     def __new__(cls, name, bases, dct):
-        if DbMeta.db:
+        def create(cls, name, bases, dct):
             bases_list = list(bases)
             if Model in bases_list:
                 bases_list.insert(bases_list.index(Model), DbMeta.db.Model)
             bases = tuple(bases_list)
-        return super(DbMeta, cls).__new__(cls, name, bases, dct)
+            return super().__new__(cls, name, bases, dct)
+
+        if DbMeta.db:
+            return create(cls, name, bases, dct)
+        else:
+            # Should only occur in testing scenarios
+            DbMeta.db = SQLAlchemy(app)
+            with app.test_request_context():
+                return create(cls, name, bases, dct)
 
 
 def validate_config(flask_config, orbach_config):
