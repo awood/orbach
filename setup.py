@@ -97,11 +97,11 @@ class build_trans(cmd.Command):
     boolean_options = ['in-place']
 
     def initialize_options(self):
-        self.build_base = None
+        self.build_lib = None
         self.in_place = False
 
     def finalize_options(self):
-        self.set_undefined_options('build', ('build_base', 'build_base'))
+        self.set_undefined_options('build', ('build_lib', 'build_lib'))
 
     def compile(self, src, dest):
         log.info("Compiling %s" % src)
@@ -112,15 +112,15 @@ class build_trans(cmd.Command):
 
     def run(self):
         po_dir = os.path.join(os.curdir, 'po')
-        for path, names, filenames in os.walk(po_dir):
+        for path, _, filenames in os.walk(po_dir):
             for f in filenames:
                 if f.endswith('.po'):
                     lang = f[:-3]
                     src = os.path.join(path, f)
                     if self.in_place:
-                        dest_path = os.path.join(os.curdir, 'locale', lang, 'LC_MESSAGES')
+                        dest_path = os.path.join(os.curdir, 'orbach', 'translations', lang, 'LC_MESSAGES')
                     else:
-                        dest_path = os.path.join(self.build_base, 'locale', lang, 'LC_MESSAGES')
+                        dest_path = os.path.join(self.build_lib, 'orbach', 'translations', lang, 'LC_MESSAGES')
                     dest = os.path.join(dest_path, 'orbach.mo')
                     if not os.path.exists(dest_path):
                         os.makedirs(dest_path)
@@ -164,6 +164,7 @@ install_requires = [
     'Flask >= 0.10.1',
     'Flask-Admin >= 1.0.8',
     'Flask-Assets < 0.10.0',
+    'Flask-Babel >= 0.9',
     'Flask-Login >= 0.2.11',
     'Flask-Plugins >= 1.4',
     'Flask-Script >= 2.0.3',

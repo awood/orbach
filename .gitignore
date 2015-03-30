@@ -6,6 +6,8 @@
 MANIFEST
 build/
 dist/
+po/POTFILES.in
+orbach/translations/**/*.mo
 .webassets-cache/
 .eggs
 **/static/generated
