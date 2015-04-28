@@ -106,5 +106,14 @@ class TestI18n(OrbachTest):
         }
         resp = self.client.get(**req)
         self.assert_200(resp)
-        self.assertIn("Voila", resp.json)
-        self.assertEqual("fr", resp.json['Voila'])
+        self.assertIn("Version de l'API", resp.json)
+        self.assertEqual("fr", resp.json['Demande Locale'])
+
+        req = {
+            'path': '/api/v1/',
+            'headers': [("Accept-Language", "en")],
+        }
+        resp = self.client.get(**req)
+        self.assert_200(resp)
+        self.assertIn("API Version", resp.json)
+        self.assertEqual("en", resp.json['Request Locale'])

@@ -93,12 +93,14 @@ class build_trans(cmd.Command):
     user_options = [
         ('build-base', 'b', "build base directory"),
         ('in-place', 'i', "build .mo files in place"),
+        ('domain', 'd', 'gettext domain (advanced users only)'),
     ]
     boolean_options = ['in-place']
 
     def initialize_options(self):
         self.build_lib = None
         self.in_place = False
+        self.domain = "messages"
 
     def finalize_options(self):
         self.set_undefined_options('build', ('build_lib', 'build_lib'))
@@ -121,7 +123,7 @@ class build_trans(cmd.Command):
                         dest_path = os.path.join(os.curdir, 'orbach', 'translations', lang, 'LC_MESSAGES')
                     else:
                         dest_path = os.path.join(self.build_lib, 'orbach', 'translations', lang, 'LC_MESSAGES')
-                    dest = os.path.join(dest_path, 'orbach.mo')
+                    dest = os.path.join(dest_path, "%s.mo" % self.domain)
                     if not os.path.exists(dest_path):
                         os.makedirs(dest_path)
                     if not os.path.exists(dest):

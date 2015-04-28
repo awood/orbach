@@ -209,8 +209,9 @@ def init_i18n(app):
     babel = Babel(app)
     babel.localeselector(get_locale)
     babel.timezoneselector(get_timezone)
+    app.translations = list(map(lambda l: str(l), babel.list_translations()))
     app.logger.debug("Default Locale: %s" % babel.default_locale)
-    app.logger.debug("Loaded translations: %s" % list(map(str, babel.list_translations())))
+    app.logger.debug("Loaded translations: %s" % app.translations)
 
 
 def init_root_dir(app):

@@ -16,8 +16,8 @@ msgstr ""
 
 #: orbach/api/v1.py:13
 msgid "API Version"
-msgstr "Bojour Monde"
+msgstr "Version de l'API"
 
 #: orbach/api/v1.py:14
 msgid "Request Locale"
-msgstr "Voila"
+msgstr "Demande Locale"

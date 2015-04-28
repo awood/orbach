@@ -10,8 +10,7 @@ def get_locale():
         return user.locale
     # otherwise try to guess the language from the user accept
     # header the browser transmits.
-    current_app.logger.debug("Returning %s" % request.accept_languages.best_match(ORBACH_LANGS))
-    return request.accept_languages.best_match(ORBACH_LANGS)
+    return request.accept_languages.best_match(current_app.translations)
 
 
 def get_timezone():
