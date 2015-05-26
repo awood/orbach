@@ -75,9 +75,19 @@ def upgrade():
     )
     galleries.create(op.get_bind())
 
+    gallery_properties = sa.Table('gallery_properties', meta,
+        id(),
+        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id')),
+        sa.Column('property', sa.Unicode(300)),
+        sa.Column('value', sa.Unicode(2000)),
+        created(),
+        modified(),
+    )
+    gallery_properties.create(op.get_bind())
+
     images = sa.Table('image_files', meta,
         id(),
-        sa.Column('file', sa.Unicode(300), nullable=False),
+        sa.Column('file', sa.Unicode(600), nullable=False),
         sa.Column('created_by', sa.Integer, sa.ForeignKey('users.id')),
         created(),
         modified(),
@@ -115,6 +125,7 @@ def upgrade():
 def downgrade():
     op.drop_table("covers")
     op.drop_table("pictures")
+    op.drop_table("gallery_properties")
     op.drop_table("galleries")
     op.drop_table("users")
     op.drop_table("roles")

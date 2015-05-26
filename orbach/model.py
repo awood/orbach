@@ -1,7 +1,8 @@
 from flask.ext.sqlalchemy import Model
 
-from sqlalchemy import Column, Integer, DateTime, Unicode, String
-from sqlalchemy import func
+from sqlalchemy import Column, Integer, DateTime, Unicode, String, ForeignKey, \
+    func
+from sqlalchemy.orm import relationship
 
 from orbach import DbMeta
 
@@ -34,12 +35,28 @@ class Gallery(Model, StandardAttributes, metaclass=DbMeta):
     name = Column(Unicode)
     description = Column(Unicode)
     parent = Column(Integer)
+    properties = relationship("GalleryProperty", backref="gallery")
 
     def to_json(self):
         return {
             "name": self.name,
             "description": self.description,
             "parent": self.parent,
+            "properties": [x.to_json() for x in self.properties],
+        }
+
+
+class GalleryProperty(Model, StandardAttributes, metaclass=DbMeta):
+    __tablename__ = "gallery_properties"
+
+    gallery_id = Column(Integer, ForeignKey('galleries.id'))
+    property = Column(Unicode)
+    value = Column(Unicode)
+
+    def to_json(self):
+        return {
+            "property": self.property,
+            "value": self.value,
         }
 
 
