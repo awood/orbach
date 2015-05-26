@@ -2,7 +2,7 @@ from flask.ext.sqlalchemy import Model
 
 from sqlalchemy import Column, Integer, DateTime, Unicode, String, ForeignKey, \
     func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from orbach import DbMeta
 
@@ -18,6 +18,8 @@ class User(Model, StandardAttributes, metaclass=DbMeta):
 
     username = Column(Unicode)
     password = Column(String)
+    image_files = relationship("ImageFile", backref="owner")
+    galleries = relationship("Gallery", backref="owner")
 
     def to_json(self):
         return {
@@ -32,16 +34,24 @@ class Role(Model, StandardAttributes, metaclass=DbMeta):
 class Gallery(Model, StandardAttributes, metaclass=DbMeta):
     __tablename__ = "galleries"
 
+    # Need this explicitly here since we reference it early on in remote_side
+    id = Column(Integer, primary_key=True)
+
     name = Column(Unicode)
     description = Column(Unicode)
-    parent = Column(Integer)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    parent_id = Column(Integer, ForeignKey("galleries.id"))
+
+    # See http://docs.sqlalchemy.org/en/latest/orm/self_referential.html#self-referential
+    children = relationship("Gallery", backref=backref('parent', remote_side=[id]))
     properties = relationship("GalleryProperty", backref="gallery")
+    pictures = relationship("Picture", backref="gallery")
 
     def to_json(self):
         return {
             "name": self.name,
             "description": self.description,
-            "parent": self.parent,
+            "parent_id": self.parent,
             "properties": [x.to_json() for x in self.properties],
         }
 
@@ -63,9 +73,31 @@ class GalleryProperty(Model, StandardAttributes, metaclass=DbMeta):
 class ImageFile(Model, StandardAttributes, metaclass=DbMeta):
     __tablename__ = "image_files"
 
+    file = Column(Unicode)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    pictures = relationship("Picture", backref="image_file")
+
+    def to_json(self):
+        return {
+            'file': self.file,
+            'owner': self.owner.to_json(),
+        }
+
 
 class Picture(Model, StandardAttributes, metaclass=DbMeta):
     __tablename__ = "pictures"
+
+    title = Column(Unicode)
+    caption = Column(Unicode)
+    image_file_id = Column(Integer, ForeignKey("image_files.id"))
+    gallery_id = Column(Integer, ForeignKey("galleries.id"))
+
+    def to_json(self):
+        return {
+            "title": self.title,
+            "caption": self.caption,
+            "image_file": self.image_file.to_json(),
+        }
 
 
 class Cover(Model, StandardAttributes, metaclass=DbMeta):

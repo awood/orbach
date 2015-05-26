@@ -68,8 +68,9 @@ def upgrade():
     galleries = sa.Table('galleries', meta,
         id(),
         sa.Column('name', sa.Unicode(175), nullable=False),
+        sa.Column('owner_id', sa.Integer, sa.ForeignKey('users.id')),
         sa.Column('description', sa.Unicode(1000)),
-        sa.Column('parent', sa.Integer),
+        sa.Column('parent_id', sa.Integer, sa.ForeignKey('galleries.id'), nullable=True),
         created(),
         modified(),
     )
@@ -88,7 +89,7 @@ def upgrade():
     images = sa.Table('image_files', meta,
         id(),
         sa.Column('file', sa.Unicode(600), nullable=False),
-        sa.Column('created_by', sa.Integer, sa.ForeignKey('users.id')),
+        sa.Column('owner_id', sa.Integer, sa.ForeignKey('users.id')),
         created(),
         modified(),
     )
