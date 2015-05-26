@@ -78,7 +78,7 @@ def upgrade():
 
     gallery_properties = sa.Table('gallery_properties', meta,
         id(),
-        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id')),
+        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id', ondelete="CASCADE")),
         sa.Column('property', sa.Unicode(300)),
         sa.Column('value', sa.Unicode(2000)),
         created(),
@@ -102,8 +102,8 @@ def upgrade():
         id(),
         sa.Column('title', sa.Unicode(300)),
         sa.Column('caption', sa.Unicode(1500)),
-        sa.Column('image_file_id', sa.Integer, sa.ForeignKey('image_files.id')),
-        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id')),
+        sa.Column('image_file_id', sa.Integer, sa.ForeignKey('image_files.id', ondelete="cascade")),
+        sa.Column('gallery_id', sa.Integer, sa.ForeignKey('galleries.id', ondelete="cascade")),
         sa.UniqueConstraint('id', 'gallery_id'),
         created(),
         modified(),
@@ -115,7 +115,8 @@ def upgrade():
         sa.Column('picture_id', sa.Integer),
         sa.Column('gallery_id', sa.Integer),
         sa.schema.ForeignKeyConstraint(
-            ['picture_id', 'gallery_id'], ['pictures.id', 'pictures.gallery_id']
+            ['picture_id', 'gallery_id'], ['pictures.id', 'pictures.gallery_id'],
+            ondelete="CASCADE"
         ),
         created(),
         modified(),

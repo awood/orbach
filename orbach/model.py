@@ -3,6 +3,7 @@ from flask.ext.sqlalchemy import Model
 from sqlalchemy import Column, Integer, DateTime, Unicode, String, ForeignKey, \
     func
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm.collections import attribute_mapped_collection
 
 from orbach import DbMeta
 
@@ -18,8 +19,8 @@ class User(Model, StandardAttributes, metaclass=DbMeta):
 
     username = Column(Unicode)
     password = Column(String)
-    image_files = relationship("ImageFile", backref="owner")
-    galleries = relationship("Gallery", backref="owner")
+    image_files = relationship("ImageFile", backref="owner", lazy="dynamic")
+    galleries = relationship("Gallery", backref="owner", lazy="dynamic")
 
     def to_json(self):
         return {
@@ -44,7 +45,8 @@ class Gallery(Model, StandardAttributes, metaclass=DbMeta):
 
     # See http://docs.sqlalchemy.org/en/latest/orm/self_referential.html#self-referential
     children = relationship("Gallery", backref=backref('parent', remote_side=[id]))
-    properties = relationship("GalleryProperty", backref="gallery")
+    properties = relationship("GalleryProperty", backref="gallery",
+        collection_class=attribute_mapped_collection('property'))
     pictures = relationship("Picture", backref="gallery")
 
     def to_json(self):
@@ -63,6 +65,10 @@ class GalleryProperty(Model, StandardAttributes, metaclass=DbMeta):
     property = Column(Unicode)
     value = Column(Unicode)
 
+    def __init__(self, property_name, value):
+        self.property = property_name
+        self.value = value
+
     def to_json(self):
         return {
             "property": self.property,
@@ -75,7 +81,7 @@ class ImageFile(Model, StandardAttributes, metaclass=DbMeta):
 
     file = Column(Unicode)
     owner_id = Column(Integer, ForeignKey("users.id"))
-    pictures = relationship("Picture", backref="image_file")
+    pictures = relationship("Picture", backref="image_file", lazy="dynamic")
 
     def to_json(self):
         return {

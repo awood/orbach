@@ -12,12 +12,7 @@ class ModelTest(OrbachTest):
         g = Gallery()
         g.name = 'x'
         g.description = 'description'
-
-        p = GalleryProperty()
-        p.property = 'hello'
-        p.value = 'world'
-
-        g.properties.append(p)
+        g.properties['hello'] = GalleryProperty('hello', 'world')
         self.session.add(g)
         self.session.commit()
 
@@ -26,7 +21,7 @@ class ModelTest(OrbachTest):
 
         result = results.first()
         self.assertEqual('x', result.name)
-        self.assertEqual('hello', result.properties[0].property)
+        self.assertEqual('world', result.properties['hello'].value)
 
         self.session.delete(g)
         self.session.commit()
