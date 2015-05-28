@@ -16,13 +16,15 @@ from io import StringIO
 from pathlib import Path
 
 from orbach.config import Config
-from orbach.util import get_locale, get_timezone
+from orbach.util import get_locale, get_timezone, gallery_dir, image_dir
 
 LOG_FORMAT = '%(asctime)s [%(levelname)s] (%(name)s:%(module)s:%(lineno)d) %(message)s'
 
 DEFAULT_CONFIG = dedent("""
 [orbach]
 application_root = /var/lib/orbach
+image_directory = images
+gallery_directory = galleries
 
 [flask]
 DEBUG = False
@@ -209,18 +211,20 @@ def init_i18n(app):
     babel = Babel(app)
     babel.localeselector(get_locale)
     babel.timezoneselector(get_timezone)
-    app.translations = list(map(lambda l: str(l), babel.list_translations()))
+    app.translations = [str(l) for l in babel.list_translations()]
     app.logger.debug("Default Locale: %s" % babel.default_locale)
     app.logger.debug("Loaded translations: %s" % app.translations)
 
 
-def init_root_dir(app):
-    p = Path(app.config.orbach["application_root"])
-    try:
-        Path.mkdir(p, parents=True)
-    except FileExistsError:
-        pass
-    app.logger.info("Working in %s" % p)
+def init_orbach_dirs(app):
+    root = Path(app.config.orbach["application_root"])
+
+    for d in [root, image_dir(app.config), gallery_dir(app.config)]:
+        try:
+            Path.mkdir(d, parents=True)
+        except FileExistsError:
+            pass
+    app.logger.info("Working in %s" % root)
 
 
 def init_app(app, config):
@@ -235,7 +239,7 @@ def init_app(app, config):
 
     init_i18n(app)
     app.db = init_db(app)
-    init_root_dir(app)
+    init_orbach_dirs(app)
 
     app.json_encoder = OrbachEncoder
 
