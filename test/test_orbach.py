@@ -105,20 +105,18 @@ class OrbachTest(TestCase):
 
 class TestI18n(OrbachTest):
     def test_i18n(self):
-        req = {
-            'path': '/api/v1/',
-            'headers': [("Accept-Language", "fr")],
-        }
-        resp = self.client.get(**req)
+        resp = self.client.get(
+            path='/api/v1/',
+            headers=[("Accept-Language", "fr")],
+        )
         self.assert_200(resp)
         self.assertIn("Version de l'API", resp.json)
         self.assertEqual("fr", resp.json['Demande Locale'])
 
-        req = {
-            'path': '/api/v1/',
-            'headers': [("Accept-Language", "en")],
-        }
-        resp = self.client.get(**req)
+        resp = self.client.get(
+            path='/api/v1/',
+            headers=[("Accept-Language", "en")],
+        )
         self.assert_200(resp)
         self.assertIn("API Version", resp.json)
         self.assertEqual("en", resp.json['Request Locale'])

@@ -1,3 +1,6 @@
+from flask.ext.babel import _
+
+
 # General exception classes
 class OrbachError(Exception):
     """Base class for exceptions."""
@@ -10,3 +13,9 @@ class OrbachError(Exception):
         return self.message
 
     __str__ = __repr__
+
+
+class ForbiddenFileExtensionError(OrbachError):
+    def __init__(self, filename):
+        msg = _("%s is not an allowed file extension.")
+        super().__init__(msg)

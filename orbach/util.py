@@ -1,10 +1,27 @@
+import hashlib
 import os
 
+from contextlib import contextmanager
 from pathlib import Path
 
 from flask import g, request, current_app
 
-ORBACH_LANGS = ['en', 'fr']
+
+def hash_stream(fh):
+    h = hashlib.sha256()
+    h.update(fh.read())
+    # Return to the beginning so the stream can be used again
+    fh.seek(0)
+    return h.hexdigest()
+
+
+@contextmanager
+def hash_file(filename):
+    try:
+        fh = open(filename, 'rb')
+        yield hash_stream(fh)
+    finally:
+        fh.close()
 
 
 def get_locale():
@@ -41,4 +58,15 @@ def gallery_dir(config=None):
 
 def lowercase_ext(filename):
     unused, ext = os.path.splitext(os.path.basename(filename))
-    return ext.lower()
+    return ext.lower().lstrip('.')
+
+
+def resolve_path_conflict(filename):
+    """Expects a pathlib.Path object."""
+    count = 0
+    while True:
+        count = count + 1
+        name, unused1, unused2 = filename.stem.partition('.')
+        newname = '{}_{:02d}{}'.format(name, count, ''.join(filename.suffixes))
+        if not filename.with_name(newname).exists():
+            return filename.with_name(newname)

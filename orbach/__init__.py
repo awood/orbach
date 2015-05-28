@@ -56,6 +56,8 @@ class OrbachLog(object):
 
 class OrbachEncoder(json.JSONEncoder):
     def default(self, o):
+        if isinstance(o, Path):
+            return str(o)
         if hasattr(o, "to_json"):
             return o.to_json()
         return super().default(o)
@@ -221,7 +223,7 @@ def init_orbach_dirs(app):
 
     for d in [root, image_dir(app.config), gallery_dir(app.config)]:
         try:
-            Path.mkdir(d, parents=True)
+            d.mkdir(parents=True)
         except FileExistsError:
             pass
     app.logger.info("Working in %s" % root)

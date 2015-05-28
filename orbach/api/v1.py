@@ -1,5 +1,5 @@
 from orbach.api import api
-from orbach.controller import GalleryController, UserController
+from orbach.controller import GalleryController, UserController, ImageFileController
 from orbach.version import __version__
 
 from flask.views import MethodView
@@ -33,13 +33,29 @@ def register_api(view, endpoint, url, pk='id', pk_type='int', authn=True):
         methods=['GET', 'PUT', 'DELETE'])
 
 
+class ImageFileApi(MethodView):
+    def get(self, image_id):
+        if image_id is None:
+            files = ImageFileController.get_all()
+        else:
+            files = ImageFileController(image_id).get()
+        return jsonify({'image_files': files})
+
+    def post(self):
+        res = ImageFileController.create(request)
+        return jsonify(res)
+
+
+register_api(ImageFileApi, "image_file_api", "/image_files/", pk="image_file_id")
+
+
 class GalleryApi(MethodView):
     def get(self, gal_id):
         if gal_id is None:
-            res = {"galleries": GalleryController.get_all()}
+            galleries = GalleryController.get_all()
         else:
-            res = {"gallery": GalleryController(gal_id).get()}
-        return jsonify(res)
+            galleries = GalleryController(gal_id).get()
+        return jsonify({'galleries': galleries})
 
     def post(self):
         post_data = request.get_json()
@@ -65,10 +81,10 @@ register_api(GalleryApi, "gallery_api", "/galleries/", pk="gal_id")
 class UserApi(MethodView):
     def get(self, user_id):
         if user_id is None:
-            res = {"users": UserController.get_all()}
+            users = UserController.get_all()
         else:
-            res = {"user": UserController(user_id).get()}
-        return jsonify(res)
+            users = UserController(user_id).get()
+        return jsonify({'users': users})
 
     def post(self):
         post_data = request.get_json()
