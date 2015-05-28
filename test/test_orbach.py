@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
@@ -68,6 +69,9 @@ class OrbachTest(TestCase):
             command.upgrade(alembic_config, "head")
 
     def create_app(self):
+        """As a side-effect, sets self.client to be a Flask test_client.  The test_client
+        is a Werkzeug TestClient and the methods off it ultimately take the arguments sent
+        to EnvironBuilder.  See http://werkzeug.pocoo.org/docs/0.10/test/#werkzeug.test.EnvironBuilder"""
         self.run_alembic()
 
         self.application_root = TemporaryDirectory(prefix="orbach_test_root_").name
@@ -96,6 +100,7 @@ class OrbachTest(TestCase):
         self.app.db.session.remove()
         os.unlink(self.db_file)
         os.unlink(self.config_file)
+        shutil.rmtree(self.application_root)
 
 
 class TestI18n(OrbachTest):

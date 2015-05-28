@@ -4,9 +4,10 @@ from test.test_orbach import OrbachTest
 
 
 class ModelTest(OrbachTest):
-    def setUp(self, *args, **kwargs):
-        super().setUp(*args, **kwargs)
-        self.session = self.app.db.session
+    def create_app(self, *args, **kwargs):
+        app = super().create_app(*args, **kwargs)
+        self.session = app.db.session
+        return app
 
     def test_gallery_properties(self):
         g = Gallery()
