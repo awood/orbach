@@ -39,9 +39,6 @@ SESSION_COOKIE_NAME = orbach_session
     "secret_key": ''.join(random.choice(string.ascii_letters) for i in range(25)),
 }
 
-app_name = __name__.split('.')[0]
-app = Flask(app_name)
-
 
 class OrbachLog(object):
     @staticmethod
@@ -110,9 +107,11 @@ class DbMeta(_BoundDeclarativeMeta):
         if DbMeta.db:
             return create(cls, name, bases, dct)
         else:
-            # Should only occur in testing scenarios
-            DbMeta.db = SQLAlchemy(app)
-            with app.test_request_context():
+            # Should only occur in testing scenarios like when Nose tries to import every
+            # *.py file it can get its hands on.
+            test_app = Flask('testing')
+            DbMeta.db = SQLAlchemy(test_app)
+            with test_app.test_request_context():
                 return create(cls, name, bases, dct)
 
 
@@ -143,7 +142,7 @@ def read_config(config_file):
     return (flask_config, orbach_config)
 
 
-def bundle_js(assets):
+def bundle_js(app, assets):
     bs_root = 'bootstrap-sass-official/vendor/assets/javascripts/bootstrap'
     js_assets = [
         'jquery/jquery.js',
@@ -166,7 +165,7 @@ def bundle_js(assets):
     assets.register('js_all', js)
 
 
-def bundle_galleria(assets):
+def bundle_galleria(app, assets):
     galleria_assets = [
         'galleria/src'
     ]
@@ -180,7 +179,7 @@ def bundle_galleria(assets):
     assets.register('galleria', galleria)
 
 
-def bundle_css(assets):
+def bundle_css(app, assets):
     # TODO Apparently these paths can be placed in a YAML file.  Might be worth doing.
     load_paths = [
         'bootstrap-sass-official/vendor/assets/stylesheets',
@@ -229,7 +228,10 @@ def init_orbach_dirs(app):
     app.logger.info("Working in %s" % root)
 
 
-def init_app(app, config):
+def init_app(config):
+    app_name = __name__.split('.')[0]
+    app = Flask(app_name)
+
     OrbachLog.setup(app)
 
     flask_config, orbach_config = config
@@ -250,11 +252,11 @@ def init_app(app, config):
     assets.url = app.static_url_path
     assets.directory = app.static_folder
 
-    bundle_js(assets)
-    bundle_css(assets)
+    bundle_js(app, assets)
+    bundle_css(app, assets)
 
-    from orbach.api import api as api_blueprint
-    app.register_blueprint(api_blueprint, url_prefix="/api/v1")
+    from orbach.api import api_blueprint
+    app.register_blueprint(api_blueprint)
 
     from orbach.gallery import gallery as gallery_blueprint
     app.register_blueprint(gallery_blueprint)
@@ -267,4 +269,4 @@ def init_app(app, config):
 
 
 def init_from_file(config_file):
-    return init_app(app, read_config(config_file))
+    return init_app(read_config(config_file))

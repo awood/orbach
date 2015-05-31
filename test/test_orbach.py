@@ -1,6 +1,8 @@
 import os
 import shutil
 
+import orbach
+
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 from flask.ext.testing import TestCase
@@ -10,12 +12,12 @@ from alembic.config import Config as AlembicConfig
 
 from textwrap import dedent
 
-from orbach import init_from_file
-
 from test import temp_file
 
 
 class OrbachTest(TestCase):
+    run_gc_after_test = True
+
     def run_alembic(self):
         # Creating a temp file for the DB for every test is pretty inefficient
         # but I couldn't figure out a way to tell SQLAlchemy to connect to a shared
@@ -93,7 +95,7 @@ class OrbachTest(TestCase):
         with open(self.config_file, 'w') as f:
             f.write(test_config)
 
-        app = init_from_file(self.config_file)
+        app = orbach.init_from_file(self.config_file)
         return app
 
     def tearDown(self):
