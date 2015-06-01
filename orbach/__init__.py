@@ -3,7 +3,7 @@ import os
 import random
 import string
 
-from flask import Flask, json
+from flask import Flask, json, got_request_exception
 from flask.ext.assets import Environment, Bundle
 from flask.ext.babel import Babel
 from flask.ext.sqlalchemy import SQLAlchemy, Model, _BoundDeclarativeMeta
@@ -49,6 +49,11 @@ class OrbachLog(object):
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
         app.logger.addHandler(handler)
+
+    @staticmethod
+    def log_exception(sender, exception, **extra):
+        """ Log an exception to our logging framework """
+        sender.logger.warn('Got exception during processing: %s', exception)
 
 
 class OrbachEncoder(json.JSONEncoder):
@@ -233,6 +238,7 @@ def init_app(config):
     app = Flask(app_name)
 
     OrbachLog.setup(app)
+    got_request_exception.connect(OrbachLog.log_exception, app)
 
     flask_config, orbach_config = config
     validate_config(flask_config, orbach_config)

@@ -1,6 +1,8 @@
 from flask import Blueprint
+from flask.ext.restful import Api
 
-api = Blueprint('api', __name__, template_folder="templates")
+api_blueprint = Blueprint('api', __name__, template_folder="templates")
+api = Api(api_blueprint, prefix="/api/v1", catch_all_404s=True)
 
 # Flask requires that all view functions be imported in the __init__.py but
 # this unfortunately causes Flake8 to complain about unused imports so we tag

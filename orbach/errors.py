@@ -1,21 +1,25 @@
 from flask.ext.babel import _
+from werkzeug.exceptions import BadRequest
+from werkzeug.http import HTTP_STATUS_CODES
 
 
-# General exception classes
 class OrbachError(Exception):
     """Base class for exceptions."""
-
-    def __init__(self, msg=''):
-        self.message = msg
-        Exception.__init__(self, msg)
+    @property
+    def data(self):
+        """Flask-RESTful looks for a dictionary named 'data' on the exception object"""
+        return {
+            'message': "%s - %s" % (HTTP_STATUS_CODES[self.code], self.description),
+        }
 
     def __repr__(self):
-        return self.message
+        return self.description
 
     __str__ = __repr__
 
 
-class ForbiddenFileExtensionError(OrbachError):
-    def __init__(self, filename):
-        msg = _("%s is not an allowed file extension.")
-        super().__init__(msg)
+class ForbiddenFileExtensionError(OrbachError, BadRequest):
+    description = _("{} is not an accepted file extension.")
+
+    def __init__(self, ext):
+        super().__init__(self.description.format(ext))

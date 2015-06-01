@@ -2,18 +2,9 @@ from orbach.api import api
 from orbach.controller import GalleryController, UserController, ImageFileController
 from orbach.version import __version__
 
-from flask.views import MethodView
+from flask.ext.restful import Resource
 from flask import jsonify, request
 from flask.ext.babel import _, get_locale
-
-
-@api.route('/')
-def status():
-    return jsonify({
-        _("Application Version"): __version__,
-        _("API Version"): "1.0",
-        _("Request Locale"): str(get_locale()),
-    })
 
 
 def authn_required(func):
@@ -23,17 +14,18 @@ def authn_required(func):
     return decorator
 
 
-def register_api(view, endpoint, url, pk='id', pk_type='int', authn=True):
-    # TODO Maybe make authn finer-grain by sending in a list with HTTP verbs
-    # and only apply the decorator to URL rules using those verbs
-    view_func = view.as_view(endpoint)
-    api.add_url_rule(url, defaults={pk: None}, view_func=view_func, methods=['GET'])
-    api.add_url_rule(url, view_func=view_func, methods=['POST'])
-    api.add_url_rule('%s<%s:%s>' % (url, pk_type, pk), view_func=view_func,
-        methods=['GET', 'PUT', 'DELETE'])
+@api.resource("/")
+class StatusApi(Resource):
+    def get(self):
+        return jsonify({
+            _("Application Version"): __version__,
+            _("API Version"): "1.0",
+            _("Request Locale"): str(get_locale()),
+        })
 
 
-class ImageFileApi(MethodView):
+@api.resource("/image_file/", "/image_file/<int:image_file_id>")
+class ImageFileApi(Resource):
     def get(self, image_id):
         if image_id is None:
             files = ImageFileController.get_all()
@@ -46,10 +38,8 @@ class ImageFileApi(MethodView):
         return jsonify(res)
 
 
-register_api(ImageFileApi, "image_file_api", "/image_files/", pk="image_file_id")
-
-
-class GalleryApi(MethodView):
+@api.resource("/gallery/", "/gallery/<int:gallery_id>")
+class GalleryApi(Resource):
     def get(self, gal_id):
         if gal_id is None:
             galleries = GalleryController.get_all()
@@ -75,10 +65,8 @@ class GalleryApi(MethodView):
             return ('', 404)
 
 
-register_api(GalleryApi, "gallery_api", "/galleries/", pk="gal_id")
-
-
-class UserApi(MethodView):
+@api.resource("/user/", "/users/<int:user_id>")
+class UserApi(Resource):
     def get(self, user_id):
         if user_id is None:
             users = UserController.get_all()
@@ -102,6 +90,3 @@ class UserApi(MethodView):
             return ("", 204)
         else:
             return ("", 404)
-
-
-register_api(UserApi, "user_api", "/users/", pk="user_id")

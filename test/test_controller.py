@@ -5,7 +5,6 @@ from werkzeug.datastructures import FileStorage
 from orbach.util import hash_file, hash_stream
 
 from test.test_orbach import OrbachTest
-from orbach.errors import ForbiddenFileExtensionError
 
 
 # TODO - These tests all run through the REST API before hitting the controller.  Fix that.
@@ -25,7 +24,7 @@ class UploadTest(OrbachTest):
 
             storage = FileStorage(f, 'dog.jpg')
             resp = self.client.post(
-                path='/api/v1/image_files/',
+                path='/api/v1/image_file/',
                 data={'file': storage}
             )
             self.assert200(resp)
@@ -39,8 +38,9 @@ class UploadTest(OrbachTest):
     def test_forbidden_extension(self):
         with open(os.path.join(self.resources, 'not_allowed.txt'), 'rb') as f:
             storage = FileStorage(f, 'not_allowed.txt')
-            with self.assertRaises(ForbiddenFileExtensionError):
-                self.client.post(
-                    path='/api/v1/image_files/',
+            resp = self.client.post(
+                    path='/api/v1/image_file/',
                     data={'file': storage}
-                )
+            )
+            self.assert400(resp)
+            self.assertRegex(resp.json['message'], '.*not an accepted file extension.*')

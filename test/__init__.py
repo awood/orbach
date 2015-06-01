@@ -1,8 +1,6 @@
 import os
-import hashlib
 import sys
 import tempfile
-import werkzeug
 
 from io import StringIO
 from contextlib import contextmanager

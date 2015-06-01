@@ -164,6 +164,7 @@ install_requires = [
     'alembic >= 0.6.7',
     'bcrypt >= 1.0.1',
     'Flask >= 0.10.1',
+    'blinker >= 1.3'
     'Flask-Admin >= 1.0.8',
     'Flask-Assets < 0.10.0',
     'Flask-Babel >= 0.9',
@@ -171,7 +172,7 @@ install_requires = [
     'Flask-Plugins >= 1.4',
     'Flask-Script >= 2.0.3',
     'Flask-SQLAlchemy >= 1.0',
-    'Flask-Uploads >= 0.1.3',
+    'Flask-RESTful >= 0.3.3',
     'Flask-WTF >= 0.9.5',
     'Pillow >= 2.5.1',
     'cssmin >= 0.2.0',
@@ -179,7 +180,7 @@ install_requires = [
 ]
 
 tests_require = [
-    'nose >= 1.3.3',
+    'nose >= 1.3.6',
     'Flask-Testing >= 0.4.2',
 ] + install_requires
 

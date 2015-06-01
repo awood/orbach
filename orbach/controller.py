@@ -24,7 +24,7 @@ class ImageFileController(object):
         filename = secure_filename(f.filename)
         allowed = f and lowercase_ext(filename) in ARCHIVES + IMAGES
         if not allowed:
-            raise ForbiddenFileExtensionError(f.filename)
+            raise ForbiddenFileExtensionError(lowercase_ext(f.filename))
 
         triplet = hash_stream(f)[:3]
 
