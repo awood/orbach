@@ -191,7 +191,7 @@ setup(
     version=version_string,
     author='Alex Wood',
     description='A simple gallery display tool',
-    license='MIT',
+    license='GPLv3',
     cmdclass=cmdclass,
     packages=find_packages(),
     include_package_data=True,
