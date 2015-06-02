@@ -32,6 +32,10 @@ class UploadTest(OrbachTest):
             destination_path = os.path.join(self.destination, triplet, 'dog.jpg')
             self.assertTrue(os.path.exists(destination_path))
 
+            self.assertEqual(os.path.join(triplet, 'dog_tbn.jpg'), resp.json['thumbnail_file'])
+            thumbnail_file = os.path.join(self.destination, triplet, 'dog_tbn.jpg')
+            self.assertTrue(os.path.exists(thumbnail_file))
+
             with hash_file(destination_path) as result_digest:
                 self.assertEquals(digest, result_digest)
 

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from flask import current_app
+
 from orbach.model import Gallery, User, ImageFile
 
 from orbach.util import lowercase_ext, image_dir, resolve_path_conflict, hash_stream
@@ -41,7 +43,12 @@ class ImageFileController(object):
 
         f.save(str(destination))
 
-        return {'image_file': destination.relative_to(image_dir())}
+        thumbnail_path = current_app.image_util.create_thumbnail(destination, storage_dir)
+
+        return {
+            'image_file': destination.relative_to(image_dir()),
+            'thumbnail_file': thumbnail_path.relative_to(image_dir())
+        }
 
     @staticmethod
     def get_all():

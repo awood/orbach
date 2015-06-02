@@ -17,6 +17,7 @@ from pathlib import Path
 
 from orbach.config import Config
 from orbach.util import get_locale, get_timezone, gallery_dir, image_dir
+from orbach.image_util import ImageUtil
 
 LOG_FORMAT = '%(asctime)s [%(levelname)s] (%(name)s:%(module)s:%(lineno)d) %(message)s'
 
@@ -25,6 +26,8 @@ DEFAULT_CONFIG = dedent("""
 application_root = /var/lib/orbach
 image_directory = images
 gallery_directory = galleries
+thumbnail_height = 250
+thumbnail_width = 250
 
 [flask]
 DEBUG = False
@@ -233,6 +236,12 @@ def init_orbach_dirs(app):
     app.logger.info("Working in %s" % root)
 
 
+def init_image_util(app):
+    conf = app.config.orbach
+    thumbnail_size = (conf.get_int('thumbnail_width'), conf.get_int('thumbnail_height'))
+    app.image_util = ImageUtil(thumbnail_size)
+
+
 def init_app(config):
     app_name = __name__.split('.')[0]
     app = Flask(app_name)
@@ -250,6 +259,7 @@ def init_app(config):
     init_i18n(app)
     app.db = init_db(app)
     init_orbach_dirs(app)
+    init_image_util(app)
 
     app.json_encoder = OrbachEncoder
 
