@@ -1,5 +1,4 @@
 import os
-import shutil
 
 import orbach
 
@@ -76,7 +75,7 @@ class OrbachTest(TestCase):
         to EnvironBuilder.  See http://werkzeug.pocoo.org/docs/0.10/test/#werkzeug.test.EnvironBuilder"""
         self.run_alembic()
 
-        self.application_root = TemporaryDirectory(prefix="orbach_test_root_").name
+        self.application_root = TemporaryDirectory(prefix="orbach_test_root_")
         test_config = dedent("""
             [orbach]
             application_root = {application_root}
@@ -88,7 +87,7 @@ class OrbachTest(TestCase):
             SQLALCHEMY_DATABASE_URI = sqlite:///{temp_db_file}
             SECRET_KEY = testing
         """).format(
-            application_root=self.application_root,
+            application_root=self.application_root.name,
             temp_db_file=self.db_file)
 
         self.config_file = NamedTemporaryFile(delete=False, prefix="orbach_test_config_").name
@@ -102,7 +101,7 @@ class OrbachTest(TestCase):
         self.app.db.session.remove()
         os.unlink(self.db_file)
         os.unlink(self.config_file)
-        shutil.rmtree(self.application_root)
+        self.application_root.cleanup()
 
 
 class TestI18n(OrbachTest):
