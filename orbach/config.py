@@ -1,16 +1,47 @@
+'''
+Copyright 2015
+
+This file is part of Orbach.
+
+Orbach is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Orbach is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
+'''
 from io import StringIO
-from configparser import ConfigParser, NoOptionError, NoSectionError
+from configparser import ConfigParser, NoOptionError, NoSectionError,\
+    BasicInterpolation
+
+
+class SelectiveInterpolation(BasicInterpolation):
+    NOT_INTERPOLATED = [
+        'SECRET_KEY'
+    ]
+
+    def before_get(self, parser, section, option, value, defaults):
+        return value
+        if option in self.NOT_INTERPOLATED:
+            return value
+        return super().before_get(parser, section, option, value, defaults)
 
 
 class Config(dict):
     SECTION = "orbach"
-    RESERVED_SECTION = "flask"
+    RESERVED_SECTION = "django"
 
     def __init__(self, conf):
         """If the conf object sent in has a readline method the configuration will
         be pulled from it as a stream.  If the object is a string, the string will be
         treated as a file to open and read from."""
-        self._parser = ConfigParser()
+        self._parser = ConfigParser(interpolation=SelectiveInterpolation())
 
         # Remove ambiguous values
         states = dict(self._parser.BOOLEAN_STATES)
@@ -31,10 +62,10 @@ class Config(dict):
         for s in self.other_sections():
             self._child_sections[s] = ConfigSection(self, s)
 
-    def flask_config(self):
+    def reserved_config(self):
         objectified_config = {}
-        for k, _ in self._parser.items(self.RESERVED_SECTION):
-            objectified_config[k.upper()] = self.objectify_flask_option(k)
+        for k, _v in self._parser.items(self.RESERVED_SECTION):
+            objectified_config[k.upper()] = self.objectify_option(k)
         return objectified_config
 
     def _is_stream(self):
@@ -44,7 +75,7 @@ class Config(dict):
         if key.upper() != key:
             return self._parser.get(self._section, key)
         else:
-            raise NoOptionError("Upper case options can only be retrieved via flask_config()", self._section)
+            raise NoOptionError("Upper case options can only be retrieved via reserved_config()", self._section)
 
     def __setitem__(self, key, value):
         persist = not key in self
@@ -117,7 +148,7 @@ class Config(dict):
     def get_int(self, item):
         return self._parser.getint(self._section, item)
 
-    def objectify_flask_option(self, key):
+    def objectify_option(self, key):
         v = self._parser.get(self.RESERVED_SECTION, key)
         try:
             v = self._parser.getboolean(self.RESERVED_SECTION, key)

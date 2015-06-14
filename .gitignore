@@ -7,9 +7,10 @@ MANIFEST
 build/
 dist/
 po/POTFILES.in
-orbach/translations/**/*.mo
+orbach/core/locale/**/*.mo
 .webassets-cache/
 .eggs
+test_deploy
 **/static/generated
 
 # bootstrap-treeview has this as a dependency but we use bootstrap-sass-official

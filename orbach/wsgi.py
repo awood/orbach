@@ -1,6 +1,16 @@
-import orbach
+"""
+WSGI config for orbach project.
 
-"""Entry point for Twisted, Gunicorn, etc.  Standalone WSGI containers just want
-a pointer to something they can import."""
+It exposes the WSGI callable as a module-level variable named ``application``.
 
-app = orbach.init_from_file(None)
+For more information on this file, see
+https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
+"""
+
+import os
+
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "orbach.settings")
+
+application = get_wsgi_application()

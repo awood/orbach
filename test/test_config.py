@@ -62,33 +62,33 @@ class ConfigTest(unittest.TestCase):
             self.assertEquals(123, conf.get_int('x'))
             self.assertEqual(1, conf.get_int('y'))
 
-    def test_objectify_flask_options(self):
-        flask_conf = dedent("""
+    def test_objectify_options(self):
+        conf = dedent("""
             [orbach]
             x = y
 
-            [flask]
+            [django]
             DEBUG = True
             SIZE = 3
             NAME = hi
         """)
-        with temp_file(flask_conf) as t:
-            conf = Config(t).flask_config()
+        with temp_file(conf) as t:
+            conf = Config(t).reserved_config()
             self.assertEquals(True, conf['DEBUG'])
             self.assertEquals(3, conf['SIZE'])
             self.assertEquals('hi', conf['NAME'])
 
     def test_objectify_does_not_cast_integers_to_bools(self):
-        flask_conf = dedent("""
+        conf = dedent("""
             [orbach]
             x = y
 
-            [flask]
+            [django]
             DEBUG = 0
             SIZE = 1
         """)
-        with temp_file(flask_conf) as t:
-            conf = Config(t).flask_config()
+        with temp_file(conf) as t:
+            conf = Config(t).reserved_config()
             self.assertEqual(0, conf['DEBUG'])
             self.assertEqual(1, conf['SIZE'])
 
@@ -97,7 +97,7 @@ class ConfigTest(unittest.TestCase):
             [orbach]
             WRONG = this
 
-            [flask]
+            [django]
             DEBUG = True
             USE_X_SENDFILE = True
         """)

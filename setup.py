@@ -100,7 +100,7 @@ class build_trans(cmd.Command):
     def initialize_options(self):
         self.build_lib = None
         self.in_place = False
-        self.domain = "messages"
+        self.domain = "django"
 
     def finalize_options(self):
         self.set_undefined_options('build', ('build_lib', 'build_lib'))
@@ -120,9 +120,9 @@ class build_trans(cmd.Command):
                     lang = f[:-3]
                     src = os.path.join(path, f)
                     if self.in_place:
-                        dest_path = os.path.join(os.curdir, 'orbach', 'translations', lang, 'LC_MESSAGES')
+                        dest_path = os.path.join(os.curdir, 'orbach', 'locale', lang, 'LC_MESSAGES')
                     else:
-                        dest_path = os.path.join(self.build_lib, 'orbach', 'translations', lang, 'LC_MESSAGES')
+                        dest_path = os.path.join(self.build_lib, 'orbach', 'locale', lang, 'LC_MESSAGES')
                     dest = os.path.join(dest_path, "%s.mo" % self.domain)
                     if not os.path.exists(dest_path):
                         os.makedirs(dest_path)
@@ -160,28 +160,23 @@ cmdclass = {
 }
 
 install_requires = [
-    'SQLAlchemy >= 0.9.7',
-    'alembic >= 0.6.7',
-    'bcrypt >= 1.0.1',
-    'Flask >= 0.10.1',
-    'blinker >= 1.3'
-    'Flask-Admin >= 1.0.8',
-    'Flask-Assets < 0.10.0',
-    'Flask-Babel >= 0.9',
-    'Flask-Login >= 0.2.11',
-    'Flask-Plugins >= 1.4',
-    'Flask-Script >= 2.0.3',
-    'Flask-SQLAlchemy >= 1.0',
-    'Flask-RESTful >= 0.3.3',
-    'Flask-WTF >= 0.9.5',
-    'Pillow >= 2.5.1',
-    'cssmin >= 0.2.0',
-    'pyScss >= 1.2.0',
+    'Django',
+    'django-annoying',
+    'djangorestframework',
+    'django-guardian',
+    'django-bcrypt',
+    'pytz',
+    'bcrypt',
+    'Pillow',
+    'cssmin',
+    'pyScss',
+    'pathlib',
 ]
 
 tests_require = [
-    'nose >= 1.3.6',
-    'Flask-Testing >= 0.4.2',
+    'selenium',
+    'nose',
+    'yanc',
 ] + install_requires
 
 version = StrictVersion("1.0.0")
