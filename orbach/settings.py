@@ -144,18 +144,22 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
 )
 
+actual_orbach_root = os.path.expanduser(orbach['application_root'])
+
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(os.path.expanduser(orbach['application_root']), 'orbach.sqlite3'),
+        'NAME': os.path.join(actual_orbach_root, 'orbach.sqlite3'),
     }
 }
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'gallery', 'static')
+    os.path.join(BASE_DIR, 'gallery', 'static'),
 )
+
+STATIC_ROOT = os.path.join(actual_orbach_root, 'static')
 
 LANGUAGES = (
     ('en', _('English')),
