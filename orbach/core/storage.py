@@ -22,25 +22,27 @@ import os
 from django.core.files.storage import FileSystemStorage
 from django.utils._os import safe_join
 
-ARCHIVES = tuple('gz bz2 zip tar tgz txz 7z'.split())
-IMAGES = tuple('jpg jpe jpeg png gif svg bmp'.split())
+ARCHIVES = tuple(['.%s' % x for x in 'gz bz2 zip tar tgz txz 7z'.split()])
+IMAGES = tuple(['.%s' % x for x in 'jpg jpe jpeg png gif svg bmp'.split()])
 
 
 class HashDistributedStorage(FileSystemStorage):
-    def _save(self, name, content):
+    def _lower_ext(self, name):
         basename, ext = os.path.splitext(name)
+        return "".join([basename, ext.lower()])
 
+    def _save(self, name, content):
+        _basename, ext = os.path.splitext(name)
         allowed = ext.lower() in ARCHIVES + IMAGES
+
         if not allowed:
             raise IOError("Files with extension %s are not allowed" % ext)
 
-        name = ".".join(basename, ext.lower())
-        return super()._save(self, name, content)
+        name = self._lower_ext(name)
+        return super()._save(name, content)
 
     def path(self, name):
-
-        hasher = hashlib.sha256()
-        hasher.update(name)
+        name = self._lower_ext(name)
+        hasher = hashlib.sha256(name.encode('utf-8'))
         hash_dir = hasher.hexdigest()[:3]
-
         return safe_join(self.location, hash_dir, name)
