@@ -35,9 +35,14 @@ class ImageFile(BaseModel):
     file = models.ImageField(max_length=150, upload_to=image_dir, storage=HashDistributedStorage,
          height_field="height", width_field="width")
     owner = models.ForeignKey(User)
+    width = models.IntegerField(default=0)
+    height = models.IntegerField(default=0)
 
     class Meta:
         db_table = "ob_image_files"
+        permissions = (
+            ('view_task', 'View task'),
+        )
 
 
 class Gallery(BaseModel):
@@ -49,6 +54,9 @@ class Gallery(BaseModel):
     class Meta:
         db_table = "ob_galleries"
         verbose_name_plural = "galleries"
+        permissions = (
+            ('view_task', 'View task'),
+        )
 
 
 class Picture(BaseModel):
@@ -60,6 +68,9 @@ class Picture(BaseModel):
     class Meta:
         db_table = "ob_pictures"
         unique_together = ('id', 'gallery')
+        permissions = (
+            ('view_task', 'View task'),
+        )
 
 
 class Cover(BaseModel):

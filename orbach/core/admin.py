@@ -18,8 +18,23 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from django.contrib import admin
 
-from orbach.core.models import ImageFile, Gallery, Cover
+from orbach.core.models import ImageFile, Gallery, Cover, Picture
+from guardian.admin import GuardedModelAdmin
 
-admin.site.register(ImageFile)
-admin.site.register(Gallery)
+
+class ImageFileAdmin(GuardedModelAdmin):
+    pass
+
+
+class GalleryAdmin(GuardedModelAdmin):
+    pass
+
+
+class PictureAdmin(GuardedModelAdmin):
+    pass
+
+
+admin.site.register(ImageFile, ImageFileAdmin)
+admin.site.register(Gallery, GalleryAdmin)
+admin.site.register(Picture, PictureAdmin)
 admin.site.register(Cover)

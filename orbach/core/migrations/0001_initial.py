@@ -2,13 +2,12 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-from django.conf import settings
-import orbach.core.storage
 import orbach.core.util
+import orbach.core.storage
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -17,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Cover',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
             ],
@@ -28,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Gallery',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=175)),
@@ -44,10 +43,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ImageFile',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
-                ('file', models.ImageField(width_field='width', height_field='height', storage=orbach.core.storage.HashDistributedStorage, upload_to=orbach.core.util.image_dir, max_length=150)),
+                ('file', models.ImageField(upload_to=orbach.core.util.image_dir, max_length=150, storage=orbach.core.storage.HashDistributedStorage, height_field='height', width_field='width')),
                 ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -57,7 +56,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Picture',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, serialize=False, primary_key=True)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('caption', models.TextField(max_length=250)),
@@ -86,5 +85,27 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='cover',
             unique_together=set([('gallery', 'picture')]),
+        ),
+        migrations.AlterModelOptions(
+            name='gallery',
+            options={'permissions': (('view_task', 'View task'),), 'verbose_name_plural': 'galleries'},
+        ),
+        migrations.AlterModelOptions(
+            name='imagefile',
+            options={'permissions': (('view_task', 'View task'),)},
+        ),
+        migrations.AlterModelOptions(
+            name='picture',
+            options={'permissions': (('view_task', 'View task'),)},
+        ),
+        migrations.AddField(
+            model_name='imagefile',
+            name='height',
+            field=models.IntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name='imagefile',
+            name='width',
+            field=models.IntegerField(default=0),
         ),
     ]
