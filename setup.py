@@ -165,6 +165,7 @@ install_requires = [
     'djangorestframework',
     'django-guardian',
     'django-bcrypt',
+    'django-crispy-forms',
     'pytz',
     'bcrypt',
     'Pillow',

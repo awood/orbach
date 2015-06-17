@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'guardian',
     'django_bcrypt',
+    'crispy_forms',
     'orbach.core',
     'orbach.gallery',
 )
@@ -169,6 +170,8 @@ LANGUAGES = (
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'core', 'locale'),
 )
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 TEMPLATES = [
     {
