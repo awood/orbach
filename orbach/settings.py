@@ -103,12 +103,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Load the conf file
-orbach = load_orbach_config()
+ORBACH = load_orbach_config()
 
 # Django options that should be immutable from the user perspective
 # The user can set these in the conf file, but anything they set will be
 # overwritten
-MEDIA_ROOT = os.path.join(orbach["application_root"], orbach['image_directory'])
+MEDIA_ROOT = os.path.join(ORBACH["application_root"], ORBACH['image_directory'])
 
 ALLOWED_HOSTS = []
 
@@ -144,14 +144,14 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
 )
 
-actual_orbach_root = os.path.expanduser(orbach['application_root'])
+EXPANDED_ORBACH_ROOT = os.path.expanduser(ORBACH['application_root'])
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(actual_orbach_root, 'orbach.sqlite3'),
+        'NAME': os.path.join(EXPANDED_ORBACH_ROOT, 'orbach.sqlite3'),
     }
 }
 
@@ -159,7 +159,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gallery', 'static'),
 )
 
-STATIC_ROOT = os.path.join(actual_orbach_root, 'static')
+STATIC_ROOT = os.path.join(EXPANDED_ORBACH_ROOT, 'static')
 
 LANGUAGES = (
     ('en', _('English')),

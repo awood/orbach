@@ -43,13 +43,13 @@ def hash_file(filename):
 
 def image_dir(instance, filename):
     return os.path.join(
-        settings.orbach["application_root"],
-        settings.orbach['image_directory'],
+        settings.EXPANDED_ORBACH_ROOT,
+        settings.ORBACH['image_directory'],
     )
 
 
 def gallery_dir():
     return os.path.join(
-        settings.orbach["application_root"],
-        settings.orbach['gallery_directory'],
+        settings.EXPANDED_ORBACH_ROOT,
+        settings.ORBACH['gallery_directory'],
     )
