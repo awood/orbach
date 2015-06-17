@@ -19,7 +19,7 @@ class ConfigTest(unittest.TestCase):
     def test_get_attribute(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            self.assertEquals(conf['hello'], 'world')
+            self.assertEqual(conf['hello'], 'world')
 
     def test_bad_get(self):
         with temp_file(self.content) as t:
@@ -34,7 +34,7 @@ class ConfigTest(unittest.TestCase):
             parser = ConfigParser()
             parser.read(t)
             self.assertTrue(parser.has_option(Config.SECTION, 'foo'))
-            self.assertEquals('bar', conf['foo'])
+            self.assertEqual('bar', conf['foo'])
 
     def test_getboolean(self):
         boolean_conf = dedent("""
@@ -59,7 +59,7 @@ class ConfigTest(unittest.TestCase):
         """)
         with temp_file(boolean_conf) as t:
             conf = Config(t)
-            self.assertEquals(123, conf.get_int('x'))
+            self.assertEqual(123, conf.get_int('x'))
             self.assertEqual(1, conf.get_int('y'))
 
     def test_objectify_options(self):
@@ -74,9 +74,9 @@ class ConfigTest(unittest.TestCase):
         """)
         with temp_file(conf) as t:
             conf = Config(t).reserved_config()
-            self.assertEquals(True, conf['DEBUG'])
-            self.assertEquals(3, conf['SIZE'])
-            self.assertEquals('hi', conf['NAME'])
+            self.assertEqual(True, conf['DEBUG'])
+            self.assertEqual(3, conf['SIZE'])
+            self.assertEqual('hi', conf['NAME'])
 
     def test_objectify_does_not_cast_integers_to_bools(self):
         conf = dedent("""
@@ -113,7 +113,7 @@ class ConfigTest(unittest.TestCase):
         """)
         with open_mock(stream) as m:
             conf = Config(m)
-            self.assertEquals("baz", conf['foo'])
+            self.assertEqual("baz", conf['foo'])
 
     def test_contains(self):
         with temp_file(self.content) as t:
@@ -154,7 +154,7 @@ class ConfigWithSectionsTest(unittest.TestCase):
     def test_section_access(self):
         with temp_file(self.content) as t:
             conf = Config(t)
-            self.assertEquals('bar', conf.get_section('other')['foo'])
+            self.assertEqual('bar', conf.get_section('other')['foo'])
 
     def test_del_from_section(self):
         with temp_file(self.content) as t:
@@ -173,13 +173,13 @@ class ConfigWithSectionsTest(unittest.TestCase):
             parser = ConfigParser()
             parser.read(t)
             self.assertTrue(parser.has_option('other', 'abc'))
-            self.assertEquals('xyz', conf.get_section('other')['abc'])
+            self.assertEqual('xyz', conf.get_section('other')['abc'])
 
     def test_other_sections(self):
         with temp_file(self.content) as t:
             conf = Config(t)
             self.assertFalse(Config.SECTION in conf.other_sections())
-            self.assertEquals(['other'], conf.other_sections())
+            self.assertEqual(['other'], conf.other_sections())
 
     def test_missing_section(self):
         with temp_file(self.content) as t:
