@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from orbach.image_util import ImageUtil
+from orbach.core.image_util import ImageUtil
 
 
 class ImageUtilTest(unittest.TestCase):
