@@ -68,9 +68,6 @@ class Picture(BaseModel):
     class Meta:
         db_table = "ob_pictures"
         unique_together = ('id', 'gallery')
-        permissions = (
-            ('view_task', 'View task'),
-        )
 
 
 class Cover(BaseModel):

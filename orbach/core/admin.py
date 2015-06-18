@@ -29,12 +29,7 @@ class ImageFileAdmin(GuardedModelAdmin):
 class GalleryAdmin(GuardedModelAdmin):
     pass
 
-
-class PictureAdmin(GuardedModelAdmin):
-    pass
-
-
 admin.site.register(ImageFile, ImageFileAdmin)
 admin.site.register(Gallery, GalleryAdmin)
-admin.site.register(Picture, PictureAdmin)
+admin.site.register(Picture)
 admin.site.register(Cover)
