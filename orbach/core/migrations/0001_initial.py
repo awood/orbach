@@ -2,12 +2,13 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import orbach.core.util
 import orbach.core.storage
 from django.conf import settings
+import orbach.core.util
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -16,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Cover',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
             ],
@@ -27,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Gallery',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=175)),
@@ -36,17 +37,17 @@ class Migration(migrations.Migration):
                 ('parent', models.ForeignKey(to='core.Gallery')),
             ],
             options={
-                'verbose_name_plural': 'galleries',
                 'db_table': 'ob_galleries',
+                'verbose_name_plural': 'galleries',
             },
         ),
         migrations.CreateModel(
             name='ImageFile',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
-                ('file', models.ImageField(upload_to=orbach.core.util.image_dir, max_length=150, storage=orbach.core.storage.HashDistributedStorage, height_field='height', width_field='width')),
+                ('file', models.ImageField(max_length=150, width_field='width', height_field='height', upload_to=orbach.core.util.image_dir, storage=orbach.core.storage.HashDistributedStorage)),
                 ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -56,7 +57,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Picture',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
+                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('caption', models.TextField(max_length=250)),
@@ -107,5 +108,17 @@ class Migration(migrations.Migration):
             model_name='imagefile',
             name='width',
             field=models.IntegerField(default=0),
+        ),
+        migrations.AlterModelOptions(
+            name='gallery',
+            options={'permissions': (('view_gallery', 'View gallery'),), 'verbose_name_plural': 'galleries'},
+        ),
+        migrations.AlterModelOptions(
+            name='imagefile',
+            options={'permissions': (('view_image_file', 'View image file'),)},
+        ),
+        migrations.AlterModelOptions(
+            name='picture',
+            options={},
         ),
     ]

@@ -41,7 +41,7 @@ class ImageFile(BaseModel):
     class Meta:
         db_table = "ob_image_files"
         permissions = (
-            ('view_task', 'View task'),
+            ('view_image_file', 'View image file'),
         )
 
 
@@ -55,7 +55,7 @@ class Gallery(BaseModel):
         db_table = "ob_galleries"
         verbose_name_plural = "galleries"
         permissions = (
-            ('view_task', 'View task'),
+            ('view_gallery', 'View gallery'),
         )
 
 
