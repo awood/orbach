@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     'guardian',
     'django_bcrypt',
     'crispy_forms',
+    'static_precompiler',
     'orbach.core',
     'orbach.gallery',
 )
@@ -155,6 +156,12 @@ DATABASES = {
         'NAME': os.path.join(EXPANDED_ORBACH_ROOT, 'orbach.sqlite3'),
     }
 }
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'static_precompiler.finders.StaticPrecompilerFinder',
+)
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gallery', 'static'),
