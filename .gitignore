@@ -5,7 +5,6 @@
 
 MANIFEST
 build/
-dist/
 po/POTFILES.in
 orbach/core/locale/**/*.mo
 .webassets-cache/
@@ -13,38 +12,64 @@ orbach/core/locale/**/*.mo
 test_deploy
 **/static/generated
 
-# bootstrap-treeview has this as a dependency but we use bootstrap-sass-official
-**/static/bootstrap
-
 # Ignore a lot of static stuff that we aren't going to need.
 **/static/**/bower.json
 **/static/**/.bower.json
 **/static/**/composer.json
 **/static/**/package.json
 **/static/**/Gruntfile.js
+**/static/**/*.md
 **/static/**/README*
 **/static/**/CHANGELOG*
 **/static/**/AUTHORS*
 **/static/**/CONTRIBUTING*
-**/static/**/less
 
-**/static/bootstrap-sass-official/sache.json
+**/patternfly/*.txt
+**/patternfly/**/test*
+**/patternfly/**/example*
 
-**/static/bootstrap-select/test.html
-**/static/bootstrap-select/js
-**/static/bootstrap-select/bootstrap-select.jquery.json
+**/patternfly/components/bootstrap-combobox/*
+!**/patternfly/components/bootstrap-combobox/js
+!**/patternfly/components/bootstrap-combobox/less
 
-**/static/bootstrap-treeview/public
-**/static/bootstrap-treeview/screenshot
-**/static/bootstrap-treeview/app.js
+**/patternfly/components/bootstrap-select/*
+!**/patternfly/components/bootstrap-select/**/*.min.*
 
-**/static/font-awesome/.gitignore
-**/static/font-awesome/.npmignore
+**/patternfly/components/bootstrap-treeview/*
+!**/patternfly/components/bootstrap-treeview/dist/*.js
 
-**/static/jquery/test
-**/static/jquery/speed
-**/static/jquery/.editorconfig*
-**/static/jquery/.git*
-**/static/jquery/.jshintrc*
-**/static/jquery/.mailmap*
-**/static/jquery/component.json
+**/patternfly/components/bootstrap/*
+!**/patternfly/components/bootstrap/dist/js
+!**/patternfly/components/bootstrap/dist/fonts
+!**/patternfly/components/bootstrap/dist/less
+
+**/patternfly/components/c3
+**/patternfly/components/d3
+
+**/patternfly/components/datatables/*
+!**/patternfly/components/datatables/media/js
+!**/patternfly/components/datatables/media/images
+
+**/patternfly/components/datatables-colvis/*
+!**/patternfly/components/datatables-colvis/js
+
+**/patternfly/components/datatables-colreorder/*
+!**/patternfly/components/datatables-colreorder/js
+!**/patternfly/components/datatables-colreorder/images
+
+**/patternfly/components/font-awesome/scss
+**/patternfly/components/font-awesome/css
+
+**/patternfly/components/html5shiv/*
+!**/patternfly/components/html5shiv/dist/*.min.js
+
+**/patternfly/components/google-code-prettify
+
+**/patternfly/components/jquery/*
+!**/patternfly/components/jquery/dist/*.min.*
+
+**/patternfly/components/respond/*
+!**/patternfly/components/respond/dest/*.min.js
+
+**/patternfly/dist/css
+**/patternfly/test-src
