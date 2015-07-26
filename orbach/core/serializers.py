@@ -36,13 +36,15 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ImageFileSerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.HyperlinkedIdentityField(
-        view_name='user-detail',
-        lookup_field='username',
+    owner = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all()
     )
 
     class Meta:
         model = ImageFile
+        fields = ('id', 'owner', 'file', 'created', 'modified', 'height', 'width')
+        read_only_fields = ('id', 'owner', 'height', 'width', 'created', 'modified')
 
 
 class PictureSerializer(serializers.HyperlinkedModelSerializer):
@@ -56,9 +58,9 @@ class CoverSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GallerySerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.HyperlinkedIdentityField(
-        view_name='user-detail',
-        lookup_field='username',
+    owner = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all()
     )
 
     class Meta:

@@ -18,22 +18,44 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from django.contrib.auth.models import User
 
-from rest_framework.viewsets import ModelViewSet
-from rest_framework import authentication, permissions
+from rest_framework import authentication, permissions, viewsets, mixins
 
-from orbach.core.serializers import ImageFileSerializer, UserSerializer
-from orbach.core.models import ImageFile
+from orbach.core.serializers import ImageFileSerializer, UserSerializer,\
+    GallerySerializer
+from orbach.core.models import ImageFile, Gallery
+from orbach.core.permissions import OrbachObjectPermissions
 
 
-class ImageFileViewSet(ModelViewSet):
+class WriteOnceViewSet(
+        mixins.CreateModelMixin,
+        mixins.ListModelMixin,
+        mixins.DestroyModelMixin,
+        mixins.RetrieveModelMixin,
+        viewsets.GenericViewSet):
+    """A viewset for objects that cannot be updated"""
+    pass
+
+
+class ImageFileViewSet(WriteOnceViewSet):
     queryset = ImageFile.objects.all()
     serializer_class = ImageFileSerializer
 
     authentication_classes = (authentication.BasicAuthentication,)
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (OrbachObjectPermissions, permissions.IsAdminUser)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class UserViewSet(ModelViewSet):
+class GalleryViewSet(viewsets.ModelViewSet):
+    queryset = Gallery.objects.all()
+    serializer_class = GallerySerializer
+
+    authentication_classes = (authentication.BasicAuthentication,)
+    permission_classes = (OrbachObjectPermissions, permissions.IsAdminUser)
+
+
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'

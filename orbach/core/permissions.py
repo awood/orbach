@@ -16,16 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.conf.urls import url, include
-from rest_framework.routers import DefaultRouter
+from rest_framework import permissions
 
-from orbach.core import views
 
-router = DefaultRouter()
-router.register(r'galleries', views.GalleryViewSet)
-router.register(r'image_files', views.ImageFileViewSet)
-router.register(r'users', views.UserViewSet)
-
-urlpatterns = [
-    url(r'^', include(router.urls)),
-]
+class OrbachObjectPermissions(permissions.DjangoObjectPermissions):
+    perms_map = {
+         'GET': ['%(app_label)s.view_%(model_name)s'],
+         'OPTIONS': [],
+         'HEAD': [],
+         'POST': ['%(app_label)s.add_%(model_name)s'],
+         'PUT': ['%(app_label)s.change_%(model_name)s'],
+         'PATCH': ['%(app_label)s.change_%(model_name)s'],
+         'DELETE': ['%(app_label)s.delete_%(model_name)s'],
+    }
