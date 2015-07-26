@@ -18,12 +18,13 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 from django.contrib import admin
 
-from orbach.core.models import ImageFile, Gallery, Cover, Picture
 from guardian.admin import GuardedModelAdmin
+
+from orbach.core.models import ImageFile, Gallery, Cover, Picture
 
 
 class ImageFileAdmin(GuardedModelAdmin):
-    pass
+    exclude = ('height', 'width')
 
 
 class GalleryAdmin(GuardedModelAdmin):
