@@ -44,6 +44,7 @@ image_directory = images
 gallery_directory = galleries
 thumbnail_height = 250
 thumbnail_width = 250
+log_level = INFO
 """)
 
 
@@ -105,10 +106,12 @@ STATIC_URL = '/static/'
 # Load the conf file
 ORBACH = load_orbach_config()
 
+ORBACH_ROOT = os.path.expanduser(ORBACH['application_root'])
+
 # Django options that should be immutable from the user perspective
 # The user can set these in the conf file, but anything they set will be
 # overwritten
-MEDIA_ROOT = os.path.join(ORBACH["application_root"], ORBACH['image_directory'])
+MEDIA_ROOT = os.path.join(ORBACH_ROOT, ORBACH['image_directory'])
 
 ALLOWED_HOSTS = []
 
@@ -146,14 +149,12 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
 )
 
-EXPANDED_ORBACH_ROOT = os.path.expanduser(ORBACH['application_root'])
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(EXPANDED_ORBACH_ROOT, 'orbach.sqlite3'),
+        'NAME': os.path.join(ORBACH_ROOT, 'orbach.sqlite3'),
     }
 }
 
@@ -167,7 +168,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gallery', 'static'),
 )
 
-STATIC_ROOT = os.path.join(EXPANDED_ORBACH_ROOT, 'static')
+STATIC_ROOT = os.path.join(ORBACH_ROOT, 'static')
 
 LANGUAGES = (
     ('en', _('English')),
@@ -211,9 +212,59 @@ PASSWORD_HASHERS = (
 )
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+        'orbach.core.permissions.OrbachObjectPermissions',
+    ],
+    'PAGE_SIZE': 20,
+}
+
+if DEBUG:
+    ORBACH['log_level'] = "DEBUG"
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] (%(name)s:%(module)s:%(lineno)d) %(message)s'
+        },
+        'simple': {
+            'format': '%(asctime)s [%(levelname)s] (%(name)s) %(message)s'
+        },
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': os.path.join(ORBACH_ROOT, 'logs'),
+            'maxBytes': 5000000,
+            'backupCount': 2,
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'orbach': {
+            'handlers': ['console', 'file'],
+            'level': ORBACH['log_level'],
+        }
+    }
 }
