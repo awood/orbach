@@ -17,13 +17,15 @@ You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import hashlib
+import logging
 import os
 
 from django.core.files.storage import FileSystemStorage
-from django.utils._os import safe_join
 
 ARCHIVES = tuple(['.%s' % x for x in 'gz bz2 zip tar tgz txz 7z'.split()])
 IMAGES = tuple(['.%s' % x for x in 'jpg jpe jpeg png gif svg bmp'.split()])
+
+log = logging.getLogger(__name__)
 
 
 class HashDistributedStorage(FileSystemStorage):
@@ -31,18 +33,23 @@ class HashDistributedStorage(FileSystemStorage):
         basename, ext = os.path.splitext(name)
         return "".join([basename, ext.lower()])
 
-    def _save(self, name, content):
+    def _validate(self, name):
         _basename, ext = os.path.splitext(name)
         allowed = ext.lower() in ARCHIVES + IMAGES
 
         if not allowed:
             raise IOError("Files with extension %s are not allowed" % ext)
 
+    def _save(self, name, content):
+        self._validate(name)
         name = self._lower_ext(name)
+        name = os.path.normpath(os.path.join(self._hash_dir(content), name))
         return super()._save(name, content)
 
-    def path(self, name):
-        name = self._lower_ext(name)
-        hasher = hashlib.sha256(name.encode('utf-8'))
-        hash_dir = hasher.hexdigest()[:3]
-        return safe_join(self.location, hash_dir, name)
+    def _hash_dir(self, content):
+        hasher = hashlib.sha256()
+
+        for chunk in content.chunks():
+            hasher.update(chunk)
+
+        return hasher.hexdigest()[:3]

@@ -29,22 +29,24 @@ class StorageTest(unittest.TestCase):
     def setUp(self):
         self.temp_dir = TemporaryDirectory(prefix="orbach_storage_test_")
         self.storage = HashDistributedStorage(location=self.temp_dir.name, base_url='/test_storage/')
+        self.resources = os.path.join(os.path.dirname(__file__), 'resources')
+        self.file_name = "cat.png"
 
     def tearDown(self):
         self.temp_dir.cleanup()
 
     def test_creates_path_based_on_hash(self):
-        file_name = 'foobar.gif'
-        content = file_name.encode('utf-8')
+        f = open(os.path.join(self.resources, self.file_name), 'rb')
+        content = f.read()
+
         expected_prefix = hashlib.sha256(content).hexdigest()[:3]
-        expected_path = os.path.join(self.temp_dir.name, expected_prefix, file_name)
+        expected_path = os.path.join(self.temp_dir.name, expected_prefix, self.file_name)
 
-        self.storage.save(file_name, ContentFile('Hello World'))
+        self.storage.save(self.file_name, ContentFile(content))
 
-        self.assertEqual(expected_path, self.storage.path(file_name))
         self.assertTrue(os.path.exists(expected_path))
         with self.storage.open(expected_path) as f:
-            self.assertEqual(f.read(), b'Hello World')
+            self.assertEqual(f.read(), content)
         self.storage.delete(expected_path)
 
     def test_forbids_unknown_extensions(self):
@@ -53,15 +55,17 @@ class StorageTest(unittest.TestCase):
             self.storage.save(file_name, ContentFile('Hello World'))
 
     def test_allows_uppercase_extensions(self):
-        file_name = 'foobar.JPG'
-        content = 'foobar.jpg'.encode('utf-8')
+        upcase_file_name = 'foobar.JPG'
+
+        f = open(os.path.join(self.resources, self.file_name), 'rb')
+        content = f.read()
+
         expected_prefix = hashlib.sha256(content).hexdigest()[:3]
         expected_path = os.path.join(self.temp_dir.name, expected_prefix, 'foobar.jpg')
 
-        self.storage.save(file_name, ContentFile('Hello World'))
+        self.storage.save(upcase_file_name, ContentFile(content))
 
-        self.assertEqual(expected_path, self.storage.path(file_name))
         self.assertTrue(os.path.exists(expected_path))
         with self.storage.open(expected_path) as f:
-            self.assertEqual(f.read(), b'Hello World')
+            self.assertEqual(f.read(), content)
         self.storage.delete(expected_path)

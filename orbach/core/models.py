@@ -19,7 +19,6 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 from django.db import models
 from django.contrib.auth.models import User
 
-from orbach.core.util import image_dir
 from orbach.core.storage import HashDistributedStorage
 
 
@@ -32,7 +31,8 @@ class BaseModel(models.Model):
 
 
 class ImageFile(BaseModel):
-    file = models.ImageField(max_length=150, upload_to=image_dir, storage=HashDistributedStorage,
+    hashed_storage = HashDistributedStorage()
+    file = models.ImageField(max_length=150, storage=hashed_storage,
          height_field="height", width_field="width")
     owner = models.ForeignKey(User)
     width = models.IntegerField(default=0)
