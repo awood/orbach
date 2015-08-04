@@ -18,8 +18,10 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import hashlib
 import logging
-import os
 
+from pathlib import Path
+
+from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
 ARCHIVES = tuple(['.%s' % x for x in 'gz bz2 zip tar tgz txz 7z'.split()])
@@ -29,22 +31,19 @@ log = logging.getLogger(__name__)
 
 
 class HashDistributedStorage(FileSystemStorage):
-    def _lower_ext(self, name):
-        basename, ext = os.path.splitext(name)
-        return "".join([basename, ext.lower()])
-
     def _validate(self, name):
-        _basename, ext = os.path.splitext(name)
-        allowed = ext.lower() in ARCHIVES + IMAGES
+        allowed = name.suffix.lower() in ARCHIVES + IMAGES
 
         if not allowed:
-            raise IOError("Files with extension %s are not allowed" % ext)
+            raise IOError("Files with extension %s are not allowed" % name.suffix)
 
     def _save(self, name, content):
+        name = Path(name)
         self._validate(name)
-        name = self._lower_ext(name)
-        name = os.path.normpath(os.path.join(self._hash_dir(content), name))
-        return super()._save(name, content)
+        name = name.with_suffix(name.suffix.lower())
+        hashed_dir = Path(self._hash_dir(content))
+        dest_name = hashed_dir.joinpath(name)
+        return super()._save(str(dest_name), content)
 
     def _hash_dir(self, content):
         hasher = hashlib.sha256()
@@ -53,3 +52,13 @@ class HashDistributedStorage(FileSystemStorage):
             hasher.update(chunk)
 
         return hasher.hexdigest()[:3]
+
+    def delete(self, name):
+        path = Path(name).resolve()
+        super().delete(name)
+        parent = path.parent
+        is_empty = parent.is_dir() and len(list(parent.iterdir())) == 0
+        ok_to_delete = is_empty and Path(settings.ORBACH_ROOT) in list(parent.parents)
+
+        if ok_to_delete:
+            parent.rmdir()

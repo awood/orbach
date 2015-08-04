@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from PIL import Image, ExifTags
 
 from django.utils.translation import ugettext as _
@@ -14,26 +12,25 @@ for c in codes:
 
 
 class ImageUtil(object):
-    def __init__(self, thumbnail_size=None):
-        if thumbnail_size is None:
-            thumbnail_size = (250, 250)
-        self.thumbnail_size = thumbnail_size
-
-    def create_thumbnail(self, image_path, destination_directory):
-        destination_file = Path("{}_tbn{}".format(image_path.stem, "".join(image_path.suffixes)))
-        destination_path = destination_directory.joinpath(destination_file)
+    @staticmethod
+    def create_thumbnail(image_path, destination_path, thumb_width=250, thumb_height=250):
+        """Create a thumbnail of image_path and save to destination_path using thumb_width
+        and thumb_height as the dimensions.  Both image_path and destination_path may be Path
+        objects."""
+        thumbnail_size = (thumb_width, thumb_height)
 
         if destination_path == image_path:
             raise IOError(_("Destination and source are the same: {}").format(image_path))
 
         img = Image.open(str(image_path))
 
-        img.thumbnail(self.thumbnail_size, Image.ANTIALIAS)
-        img = self._orient(img)
+        img.thumbnail(thumbnail_size, Image.ANTIALIAS)
+        img = ImageUtil._orient(img)
         img.save(str(destination_path))
         return destination_path
 
-    def _orient(self, img):
+    @staticmethod
+    def _orient(img):
         """Much of this courtesy http://stackoverflow.com/questions/4228530"""
         if 'exif' not in img.info:
             # Not a JPG

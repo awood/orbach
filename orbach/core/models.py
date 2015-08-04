@@ -19,9 +19,12 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch.dispatcher import receiver
 from django.contrib.auth.models import User
 
 from orbach.core.storage import HashDistributedStorage
+from orbach.core.fields import ThumbnailImageField
 
 log = logging.getLogger(__name__)
 
@@ -39,7 +42,7 @@ class BaseModel(models.Model):
 
 class ImageFile(BaseModel):
     hashed_storage = HashDistributedStorage()
-    file = models.ImageField(max_length=150, storage=hashed_storage,
+    file = ThumbnailImageField(max_length=150, storage=hashed_storage,
          height_field="height", width_field="width")
     owner = models.ForeignKey(User, related_name='image_files')
     width = models.IntegerField(default=0)
@@ -53,6 +56,12 @@ class ImageFile(BaseModel):
         permissions = (
             ('view_image_file', 'View image file'),
         )
+
+
+@receiver(pre_delete, sender=ImageFile)
+def imagefile_delete(sender, instance, **kwargs):
+    # Set save to False to instance doesn't try to save the object
+    instance.file.delete(save=False)
 
 
 class Gallery(BaseModel):

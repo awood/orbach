@@ -173,6 +173,7 @@ install_requires = [
     'cssmin',
     'pyScss',
     'pathlib',
+    'urlpath',
 ]
 
 tests_require = [

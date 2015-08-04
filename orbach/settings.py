@@ -218,7 +218,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-if DEBUG:
+if DEBUG or ORBACH['debug']:
     ORBACH['log_level'] = "DEBUG"
 
 LOGGING = {
