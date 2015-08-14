@@ -9,6 +9,7 @@ po/POTFILES.in
 orbach/core/locale/**/*.mo
 .webassets-cache/
 .eggs
+.coverage
 test_deploy
 **/static/generated
 

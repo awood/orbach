@@ -24,6 +24,10 @@ from io import StringIO
 from contextlib import contextmanager
 from unittest.mock import mock_open, patch
 
+from django.conf import settings
+from django.core.management import call_command
+from django.db.models import loading
+
 
 @contextmanager
 def temp_file(content, *args, **kwargs):

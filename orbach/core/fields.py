@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 class ThumbnailImageFieldFile(ImageFieldFile):
     def _add_thumb(self, path_item):
         destination_file = "{}_tbn{}".format(path_item.stem, "".join(path_item.suffixes))
-        return path_item.with_name(destination_file)
+        return str(path_item.with_name(destination_file))
 
     def _get_thumb_path(self):
         return self._add_thumb(Path(self.path))

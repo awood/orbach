@@ -180,6 +180,8 @@ tests_require = [
     'selenium',
     'nose',
     'yanc',
+    'django-nose',
+    'coverage',
 ] + install_requires
 
 version = StrictVersion("1.0.0")

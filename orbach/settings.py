@@ -75,6 +75,7 @@ def load_orbach_config():
 
     return orbach_config
 
+TESTING = "test" in sys.argv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -268,3 +269,11 @@ LOGGING = {
         }
     }
 }
+
+
+if TESTING:
+    INSTALLED_APPS = list(INSTALLED_APPS) + ['orbach.test', 'django_nose']
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    DATABASES['default']['TEST'] = {
+        'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
+    }
