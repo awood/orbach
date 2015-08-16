@@ -62,5 +62,4 @@ class ThumbnailImageField(ImageField):
     def __init__(self, thumb_width=250, thumb_height=250, *args, **kwargs):
         self.thumb_width = thumb_width
         self.thumb_height = thumb_height
-        log.debug("Thumb dimensions {} and {}".format(thumb_height, thumb_width))
         super().__init__(*args, **kwargs)

@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-
 """
 Django 1.8 settings for Orbach project.
 
@@ -28,6 +27,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 import os
 import sys
+import tempfile
 
 from io import StringIO
 
@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'orbach.wsgi.application'
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -107,12 +107,9 @@ STATIC_URL = '/static/'
 # Load the conf file
 ORBACH = load_orbach_config()
 
-ORBACH_ROOT = os.path.expanduser(ORBACH['application_root'])
-
 # Django options that should be immutable from the user perspective
 # The user can set these in the conf file, but anything they set will be
-# overwritten
-MEDIA_ROOT = os.path.join(ORBACH_ROOT, ORBACH['image_directory'])
+# overwritten.
 
 ALLOWED_HOSTS = []
 
@@ -133,6 +130,24 @@ INSTALLED_APPS = (
     'orbach.gallery',
 )
 
+ORBACH_ROOT = os.path.expanduser(ORBACH['application_root'])
+
+# Database
+# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(ORBACH_ROOT, 'orbach.sqlite3'),
+    }
+}
+
+if TESTING:
+    INSTALLED_APPS = list(INSTALLED_APPS) + ['orbach.test', 'django_nose']
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    ORBACH_ROOT = tempfile.mkdtemp(prefix="orbach_test_root_")
+
+MEDIA_ROOT = os.path.join(ORBACH_ROOT, ORBACH['image_directory'])
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -149,15 +164,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'guardian.backends.ObjectPermissionBackend',
 )
-
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(ORBACH_ROOT, 'orbach.sqlite3'),
-    }
-}
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -247,7 +253,7 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
             'formatter': 'verbose',
-            'filename': os.path.join(ORBACH_ROOT, 'logs'),
+            'filename': os.path.join(ORBACH_ROOT, 'orbach.log'),
             'maxBytes': 5000000,
             'backupCount': 2,
         }
@@ -269,11 +275,3 @@ LOGGING = {
         }
     }
 }
-
-
-if TESTING:
-    INSTALLED_APPS = list(INSTALLED_APPS) + ['orbach.test', 'django_nose']
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-    DATABASES['default']['TEST'] = {
-        'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
-    }

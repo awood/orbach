@@ -23,8 +23,25 @@ from tempfile import TemporaryDirectory
 
 from django.core.files.base import ContentFile
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from orbach.test.models import DummyThumbnailModel, DummyThumbnailNoSignalModel
+
+
+class MediaRootCreator(object):
+    """Create a new MEDIA_ROOT for each test to avoid file conflict renaming issues."""
+    directories = []
+
+    @classmethod
+    def new_media_root(cls):
+        root = TemporaryDirectory(prefix="orbach_imagefield_test_")
+        cls.directories.append(root)
+        return root.name
+
+    @classmethod
+    def purge(cls):
+        for x in cls.directories:
+            x.cleanup()
 
 
 class ThumbnailImageFieldTest(TestCase):
@@ -32,7 +49,6 @@ class ThumbnailImageFieldTest(TestCase):
         super().setUp()
         self.resources = os.path.join(os.path.dirname(__file__), 'resources')
         self.img_path = Path(os.path.join(self.resources, "dog.jpg"))
-        self.temp_dir = TemporaryDirectory(prefix="orbach_field_test_")
 
         with open(str(self.img_path), 'rb') as f:
             self.content = f.read()
@@ -41,36 +57,37 @@ class ThumbnailImageFieldTest(TestCase):
     def tearDownClass(cls):
         DummyThumbnailModel.objects.all().delete()
         DummyThumbnailNoSignalModel.objects.all().delete()
+        MediaRootCreator.purge()
 
+    @override_settings(MEDIA_ROOT=MediaRootCreator.new_media_root())
     def test_save(self):
-        with self.settings(ORBACH_ROOT=self.temp_dir.name):
-            content_file = ContentFile(self.content, name="dog.jpg")
-            d = DummyThumbnailModel.objects.create(file=content_file)
-            d.refresh_from_db(fields=['file'])
-            self.assertRegex(d.file.thumb_path, r'dog_.+_tbn.jpg')
+        content_file = ContentFile(self.content, name="dog.jpg")
+        d = DummyThumbnailModel.objects.create(file=content_file)
+        d.refresh_from_db(fields=['file'])
+        self.assertRegex(d.file.thumb_path, r'dog_tbn.jpg$')
 
+    @override_settings(MEDIA_ROOT=MediaRootCreator.new_media_root())
     def test_delete_with_signal_configured(self):
-        with self.settings(ORBACH_ROOT=self.temp_dir.name):
-            content_file = ContentFile(self.content, name="dog.jpg")
-            d = DummyThumbnailModel.objects.create(file=content_file)
-            d.refresh_from_db(fields=['file'])
-            thumb_path = d.file.thumb_path
-            self.assertRegex(thumb_path, r'dog_.+_tbn.jpg')
-            self.assertTrue(os.path.exists(thumb_path))
-            self.assertTrue(os.path.exists(d.file.path))
-            DummyThumbnailModel.objects.all().delete()
-            self.assertFalse(os.path.exists(d.file.path))
-            self.assertFalse(os.path.exists(thumb_path))
+        content_file = ContentFile(self.content, name="dog.jpg")
+        d = DummyThumbnailModel.objects.create(file=content_file)
+        d.refresh_from_db(fields=['file'])
+        thumb_path = d.file.thumb_path
+        self.assertRegex(thumb_path, r'dog_tbn.jpg$')
+        self.assertTrue(os.path.exists(thumb_path))
+        self.assertTrue(os.path.exists(d.file.path))
+        DummyThumbnailModel.objects.all().delete()
+        self.assertFalse(os.path.exists(d.file.path))
+        self.assertFalse(os.path.exists(thumb_path))
 
+    @override_settings(MEDIA_ROOT=MediaRootCreator.new_media_root())
     def test_no_delete_without_signal(self):
-        with self.settings(ORBACH_ROOT=self.temp_dir.name):
-            content_file = ContentFile(self.content, name="dog.jpg")
-            d = DummyThumbnailNoSignalModel.objects.create(file=content_file)
-            d.refresh_from_db(fields=['file'])
-            thumb_path = d.file.thumb_path
-            self.assertRegex(thumb_path, r'dog_.+_tbn.jpg')
-            self.assertTrue(os.path.exists(thumb_path))
-            self.assertTrue(os.path.exists(d.file.path))
-            DummyThumbnailNoSignalModel.objects.all().delete()
-            self.assertTrue(os.path.exists(d.file.path))
-            self.assertTrue(os.path.exists(thumb_path))
+        content_file = ContentFile(self.content, name="dog.jpg")
+        d = DummyThumbnailNoSignalModel.objects.create(file=content_file)
+        d.refresh_from_db(fields=['file'])
+        thumb_path = d.file.thumb_path
+        self.assertRegex(thumb_path, r'dog_tbn.jpg$')
+        self.assertTrue(os.path.exists(thumb_path))
+        self.assertTrue(os.path.exists(d.file.path))
+        DummyThumbnailNoSignalModel.objects.all().delete()
+        self.assertTrue(os.path.exists(d.file.path))
+        self.assertTrue(os.path.exists(thumb_path))

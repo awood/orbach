@@ -18,15 +18,12 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import os
 import sys
-import tempfile
+
+from tempfile import NamedTemporaryFile
 
 from io import StringIO
 from contextlib import contextmanager
 from unittest.mock import mock_open, patch
-
-from django.conf import settings
-from django.core.management import call_command
-from django.db.models import loading
 
 
 @contextmanager
@@ -34,7 +31,7 @@ def temp_file(content, *args, **kwargs):
     try:
         kwargs['delete'] = False
         kwargs.setdefault('prefix', 'orbach')
-        fn = tempfile.NamedTemporaryFile(*args, **kwargs)
+        fn = NamedTemporaryFile(*args, **kwargs)
         fn.write(bytes(content, "utf-8"))
         fn.close()
         yield fn.name

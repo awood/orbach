@@ -34,7 +34,7 @@ class BaseModel(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "<%s: %s>" % (__class__.__name__, vars(self))
+        return "<%s: %s>" % (self.__class__.__name__, vars(self))
 
     class Meta:
         abstract = True
