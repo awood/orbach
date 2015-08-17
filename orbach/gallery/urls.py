@@ -16,16 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.shortcuts import render
+from django.conf.urls import url
 
+from orbach.gallery import views as v
 
-def home(request):
-    return render(request, "index.html", {})
-
-
-def login(request):
-    return render(request, "login.html", {})
-
-
-def text_file(request, filename):
-    return render(request, filename, {}, content_type='text/plain')
+urlpatterns = [
+    url(r'^$', v.home, name='home'),
+    url(r'^login.html$', v.login, name='login'),
+    url(r'^(?P<filename>(robots.txt))$', v.text_file, name='text_file'),
+]
