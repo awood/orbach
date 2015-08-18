@@ -171,6 +171,10 @@ STATICFILES_FINDERS = (
     'static_precompiler.finders.StaticPrecompilerFinder',
 )
 
+STATIC_PRECOMPILER_COMPILERS = (
+    'static_precompiler.compilers.LESS',
+)
+
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gallery', 'static'),
 )
