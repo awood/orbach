@@ -166,7 +166,7 @@ install_requires = [
     'django-guardian',
     'django-bcrypt',
     'django-crispy-forms',
-    'django-static-precompiler',
+    'django-pipeline',
     'pytz',
     'bcrypt',
     'Pillow',

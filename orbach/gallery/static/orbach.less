@@ -1,35 +1,38 @@
-// OpenSans
-@import "patternfly/less/fonts.less";
-
-// Bootstrap
-@import "patternfly/components/bootstrap/less/bootstrap.less";
-
-// Font Awesome
-@import "patternfly/components/font-awesome/less/font-awesome.less";
-
-@import "patternfly/less/variables.less";
-@import "patternfly/less/mixins.less";
-@import "patternfly/less/alerts.less";
-@import "patternfly/less/badges.less";
-@import "patternfly/less/breadcrumbs.less";
-@import "patternfly/less/buttons.less";
-@import "patternfly/less/dropdowns.less";
-@import "patternfly/less/forms.less";
-@import "patternfly/less/labels.less";
-@import "patternfly/less/list-group.less";
-@import "patternfly/less/modals.less";
-@import "patternfly/less/pager.less";
-@import "patternfly/less/pagination.less";
-@import "patternfly/less/panels.less";
-@import "patternfly/less/popovers.less";
-@import "patternfly/less/progress-bars.less";
-@import "patternfly/less/tables.less";
-@import "patternfly/less/tabs.less";
-@import "patternfly/less/tooltip.less";
-@import "patternfly/less/type.less";
+@pf: "patternfly/less";
+@pf-components: "patternfly/components";
 
 @font-path: "static/patternfly/dist/fonts";
 @fa-font-path: "static/patternfly/components/font-awesome/fonts";
+
+/* OpenSans */
+@import (reference) "@{pf}/fonts.less";
+
+/* Bootstrap */
+@import (reference) "@{pf-components}/bootstrap/less/bootstrap.less";
+
+/* Font Awesome */
+@import (reference) "@{pf-components}/font-awesome/less/font-awesome.less";
+
+@import (reference) "@{pf}/variables.less";
+@import (reference) "@{pf}/mixins.less";
+@import (reference) "@{pf}/alerts.less";
+@import (reference) "@{pf}/badges.less";
+@import (reference) "@{pf}/breadcrumbs.less";
+@import (reference) "@{pf}/buttons.less";
+@import (reference) "@{pf}/dropdowns.less";
+@import (reference) "@{pf}/forms.less";
+@import (reference) "@{pf}/labels.less";
+@import (reference) "@{pf}/list-group.less";
+@import (reference) "@{pf}/modals.less";
+@import (reference) "@{pf}/pager.less";
+@import (reference) "@{pf}/pagination.less";
+@import (reference) "@{pf}/panels.less";
+@import (reference) "@{pf}/popovers.less";
+@import (reference) "@{pf}/progress-bars.less";
+@import (reference) "@{pf}/tables.less";
+@import (reference) "@{pf}/tabs.less";
+@import (reference) "@{pf}/tooltip.less";
+@import (reference) "@{pf}/type.less";
 
 span.welcome-logo {
     font-size: 75px;

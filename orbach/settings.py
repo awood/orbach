@@ -125,7 +125,7 @@ INSTALLED_APPS = (
     'guardian',
     'django_bcrypt',
     'crispy_forms',
-    'static_precompiler',
+    'pipeline',
     'orbach.core',
     'orbach.gallery',
 )
@@ -168,18 +168,50 @@ AUTHENTICATION_BACKENDS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'static_precompiler.finders.StaticPrecompilerFinder',
+    'pipeline.finders.PipelineFinder',
 )
 
-STATIC_PRECOMPILER_COMPILERS = (
-    'static_precompiler.compilers.LESS',
-)
+STATIC_ROOT = os.path.join(ORBACH_ROOT, 'static')
+
+PIPELINE_COMPILERS = ['pipeline.compilers.less.LessCompiler']
+PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
+
+PIPELINE_CSS = {
+    'patternfly': {
+        'source_filenames': ['patternfly/dist/css/patternfly.min.css'],
+        'output_filename': os.path.join(STATIC_ROOT, 'patternfly.min.css'),
+    },
+    'patternfly-additional': {
+        'source_filenames': ['patternfly/dist/css/patternfly-additions.min.css'],
+        'output_filename': os.path.join(STATIC_ROOT, 'patternfly-additional.min.css'),
+    },
+    'orbach': {
+        'source_filenames': ['orbach.less'],
+        'output_filename': os.path.join(STATIC_ROOT, 'orbach.css'),
+    },
+}
+
+PIPELINE_JS = {
+    'jquery': {
+        'source_filenames': ['patternfly/components/jquery/dist/jquery.min.js'],
+        'output_filename': os.path.join(STATIC_ROOT, 'jquery.min.js'),
+    },
+    'bootstrap': {
+        'source_filenames': ['patternfly/components/bootstrap/dist/js/bootstrap.min.js'],
+        'output_filename': os.path.join(STATIC_ROOT, 'bootstrap.min.js'),
+    },
+    'patternfly': {
+        'source_filenames': ['patternfly/dist/js/patternfly.min.js'],
+        'output_filename': os.path.join(STATIC_ROOT, 'patternfly.min.js'),
+    },
+}
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gallery', 'static'),
 )
 
-STATIC_ROOT = os.path.join(ORBACH_ROOT, 'static')
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 LANGUAGES = (
     ('en', _('English')),
