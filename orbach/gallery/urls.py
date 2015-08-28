@@ -24,4 +24,6 @@ urlpatterns = [
     url(r'^$', v.home, name='home'),
     url(r'^login.html$', v.login, name='login'),
     url(r'^(?P<filename>(robots.txt))$', v.text_file, name='text_file'),
+    url(r'^lost_username.html$', v.lost_username, name='lost_username'),
+    url(r'^lost_password.html$', v.lost_password, name='lost_password'),
 ]

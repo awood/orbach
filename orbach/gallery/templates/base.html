@@ -2,6 +2,7 @@
 {% load pipeline %}
 
 <!DOCTYPE html>
+<html {% if pf_class %}class="{{ pf_class }}"{% endif %}>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,3 +20,4 @@
 <body>
 {% block content %}{% endblock %}
 </body>
+</html>
