@@ -36,7 +36,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from orbach.config import Config
 
-
 ORBACH_DEFAULT_CONFIG = ("""
 [orbach]
 application_root = /var/lib/orbach
@@ -52,6 +51,7 @@ def load_orbach_config():
     try:
         conf_file = os.environ['ORBACH_CONFIG']
         conf_file = os.path.expanduser(conf_file)
+        print("Loading %s" % conf_file)
         fh = open(conf_file, 'r')
     except KeyError:
         error_msg = "Set the %s environment variable" % 'ORBACH_CONFIG'
@@ -111,7 +111,7 @@ ORBACH = load_orbach_config()
 # The user can set these in the conf file, but anything they set will be
 # overwritten.
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 # Application definition
 INSTALLED_APPS = (
@@ -168,6 +168,7 @@ AUTHENTICATION_BACKENDS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.CachedFileFinder',
     'pipeline.finders.PipelineFinder',
 )
 
@@ -177,41 +178,41 @@ PIPELINE_COMPILERS = ['pipeline.compilers.less.LessCompiler']
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
 PIPELINE_CSS = {
     'patternfly': {
         'source_filenames': ['patternfly/dist/css/patternfly.min.css'],
-        'output_filename': os.path.join(STATIC_ROOT, 'patternfly.min.css'),
+        'output_filename': 'patternfly.min.css',
     },
     'patternfly-additional': {
         'source_filenames': ['patternfly/dist/css/patternfly-additions.min.css'],
-        'output_filename': os.path.join(STATIC_ROOT, 'patternfly-additional.min.css'),
+        'output_filename': 'patternfly-additional.min.css',
     },
     'orbach': {
         'source_filenames': ['orbach.less'],
-        'output_filename': os.path.join(STATIC_ROOT, 'orbach.css'),
+        'output_filename': 'orbach.css',
     },
 }
 
 PIPELINE_JS = {
     'jquery': {
         'source_filenames': ['patternfly/components/jquery/dist/jquery.min.js'],
-        'output_filename': os.path.join(STATIC_ROOT, 'jquery.min.js'),
+        'output_filename': 'jquery.min.js',
     },
     'bootstrap': {
         'source_filenames': ['patternfly/components/bootstrap/dist/js/bootstrap.min.js'],
-        'output_filename': os.path.join(STATIC_ROOT, 'bootstrap.min.js'),
+        'output_filename': 'bootstrap.min.js',
     },
     'patternfly': {
         'source_filenames': ['patternfly/dist/js/patternfly.min.js'],
-        'output_filename': os.path.join(STATIC_ROOT, 'patternfly.min.js'),
+        'output_filename': 'patternfly.min.js',
     },
 }
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'gallery', 'static'),
 )
-
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 LANGUAGES = (
     ('en', _('English')),
@@ -260,7 +261,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-if DEBUG or ORBACH['debug']:
+if DEBUG:
     ORBACH['log_level'] = "DEBUG"
 
 LOGGING = {

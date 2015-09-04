@@ -19,10 +19,19 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 from selenium import webdriver
 
 from django.core.urlresolvers import reverse
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+#from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import LiveServerTestCase
+
+from django.test import override_settings
 
 
-class OrbachSeleniumTest(StaticLiveServerTestCase):
+# Set DEBUG to true to serve static files with django-pipeline.
+# Having DEBUG=False doesn't work properly with django-pipeline nor does
+# StaticLiveServerTestCase.
+
+# Also be mindful about what conf file Orbach is loading
+@override_settings(DEBUG=True)
+class OrbachSeleniumTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
         self.browser.implicitly_wait(3)

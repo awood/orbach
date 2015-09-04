@@ -16,15 +16,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.core.urlresolvers import reverse
-
 from test.functional import OrbachSeleniumTest
 
-from nose.tools import nottest
+from nose.plugins.attrib import attr
 
 
-class StaticResourcesTest(OrbachSeleniumTest):
-    @nottest
-    def test_template_used(self):
-        response = self.client.get(reverse('gallery'))
-        self.assertTemplateUsed(response, "index.html")
+@attr('functional')
+class LoginPageTest(OrbachSeleniumTest):
+    def setUp(self):
+        super().setUp()
+        self.url = self.get_full_url("gallery:login")
+
+    def test_login_title(self):
+        self.browser.get(self.url)
+        self.assertEqual("Sign in to Orbach", self.browser.title)
