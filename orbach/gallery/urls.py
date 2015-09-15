@@ -21,7 +21,8 @@ from django.conf.urls import url
 from orbach.gallery import views as v
 
 urlpatterns = [
-    url(r'^$', v.home, name='home'),
+    url(r'^$', v.home),
+    url(r'^index.html$', v.home, name='home'),
     url(r'^login.html$', v.login, name='login'),
     url(r'^(?P<filename>(robots.txt))$', v.text_file, name='text_file'),
     url(r'^lost_username.html$', v.lost_username, name='lost_username'),

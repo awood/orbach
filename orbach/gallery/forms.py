@@ -23,7 +23,7 @@ from django.forms import widgets
 from django.utils.translation import ugettext as _
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, HTML
+from crispy_forms.layout import Layout, Div, HTML, Submit
 from crispy_forms.bootstrap import StrictButton
 
 
@@ -46,7 +46,7 @@ class LoginForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_id = 'login_form'
         self.helper.form_method = 'post'
-        self.helper.form_action = 'login'
+        self.helper.form_action = 'login.html'
 
         self.helper.form_class = 'form-horizontal'
         self.helper.field_class = 'col-sm-10 col-md-10'
@@ -69,7 +69,7 @@ class LoginForm(forms.Form):
                     css_class="col-xs-8 col-sm-offset-2 col-sm-6 col-md-offset-2 col-md-6"
                 ),
                 Div(
-                    StrictButton(_('Sign in'), css_class='btn btn-primary btn-lg'),
+                    Submit('sign_in', _('Sign in'), css_class='btn btn-primary btn-lg'),
                     css_class="col-xs-4 col-sm-4 col-md-4 submit"
                 ),
                 css_class="form-group",

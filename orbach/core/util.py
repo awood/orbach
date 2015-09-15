@@ -22,6 +22,7 @@ import os
 from contextlib import contextmanager
 
 from django.conf import settings
+from django.http import HttpResponse
 
 
 def hash_stream(fh):
@@ -53,3 +54,7 @@ def gallery_dir():
         settings.ORBACH_ROOT,
         settings.ORBACH['gallery_directory'],
     )
+
+
+class HttpResponseUnauthorized(HttpResponse):
+    status_code = 401

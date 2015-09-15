@@ -34,10 +34,16 @@
 @import (reference) "@{pf}/tooltip.less";
 @import (reference) "@{pf}/type.less";
 
+@import (reference) "@{pf}/icons.less";
+
 span.welcome-logo {
     font-size: 75px;
 }
 
 .login-pf body {
-background: #080808 url("img/bg-login.jpg") repeat-x 50% 0;
+    background: #080808 url("img/bg-login.jpg") repeat-x 50% 0;
+}
+
+form#login_form .alert ul li {
+    list-style-type: none;
 }
