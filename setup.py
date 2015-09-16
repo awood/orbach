@@ -183,6 +183,7 @@ tests_require = [
     'django-nose',
     'coverage',
     'factory_boy',
+    'fake-factory',
 ] + install_requires
 
 version = StrictVersion("1.0.0")

@@ -178,7 +178,11 @@ PIPELINE_COMPILERS = ['pipeline.compilers.less.LessCompiler']
 PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.NoopCompressor'
 
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+# See https://github.com/cyberdelia/django-pipeline/issues/277
+if DEBUG:
+    STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+else:
+    STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 PIPELINE_CSS = {
     'patternfly': {
