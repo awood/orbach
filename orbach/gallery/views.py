@@ -21,8 +21,8 @@ import logging
 from django.contrib import auth
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from django.utils.translation import ugettext as _
 
+from orbach.gallery import msg
 from orbach.gallery.forms import LoginForm
 
 log = logging.getLogger(__name__)
@@ -60,9 +60,9 @@ def login(request):
                     auth.login(request, user)
                     return HttpResponseRedirect('/gallery/index.html')
                 else:
-                    form.add_error(None, _("Your account is inactive."))
+                    form.add_error(None, msg.INACTIVE_ACCOUNT)
             else:
-                form.add_error(None, _("Invalid login details."))
+                form.add_error(None, msg.INVALID_LOGIN)
     else:
         form = LoginForm
     return render(request, 'login.html', {'form': form, 'pf_class': 'login-pf'})

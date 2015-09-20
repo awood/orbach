@@ -16,21 +16,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import factory
-from faker import Faker
+from django.test import TestCase
 
-from orbach.core import models
-
-fake = Faker()
+from test import fixtures
+from orbach.gallery.forms import LoginForm
 
 
-class UserFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = models.User
-
-    first_name = fake.first_name()
-    last_name = fake.last_name()
-    is_active = True
-    username = ".".join([first_name, last_name]).lower()
-    password = factory.PostGenerationMethodCall('set_password', 'password')
-    email = "%s@example.com" % (username)
+class LoginFormTest(TestCase):
+    def test_is_valid(self):
+        user = fixtures.UserFactory.create()
+        form_data = {
+            'username': user.username,
+            'password': 'password',
+        }
+        form = LoginForm(data=form_data)
+        self.assertTrue(form.is_valid())

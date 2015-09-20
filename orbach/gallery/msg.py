@@ -16,21 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-import factory
-from faker import Faker
 
-from orbach.core import models
-
-fake = Faker()
+from django.utils.translation import ugettext as _
 
 
-class UserFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = models.User
-
-    first_name = fake.first_name()
-    last_name = fake.last_name()
-    is_active = True
-    username = ".".join([first_name, last_name]).lower()
-    password = factory.PostGenerationMethodCall('set_password', 'password')
-    email = "%s@example.com" % (username)
+INACTIVE_ACCOUNT = _("Your account is inactive.")
+INVALID_LOGIN = _("Invalid login details.")
