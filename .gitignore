@@ -28,6 +28,7 @@ test_deploy
 **/patternfly/*.txt
 **/patternfly/**/test*
 **/patternfly/**/example*
+**/patternfly/dist/img/*
 
 **/patternfly/components/bootstrap-combobox/*
 !**/patternfly/components/bootstrap-combobox/js
