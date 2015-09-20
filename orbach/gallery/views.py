@@ -21,11 +21,9 @@ import logging
 from django.contrib import auth
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from django.http.response import HttpResponseForbidden
 from django.utils.translation import ugettext as _
 
 from orbach.gallery.forms import LoginForm
-from orbach.core.util import HttpResponseUnauthorized
 
 log = logging.getLogger(__name__)
 

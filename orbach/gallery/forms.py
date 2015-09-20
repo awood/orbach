@@ -24,7 +24,6 @@ from django.utils.translation import ugettext as _
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, HTML, Submit
-from crispy_forms.bootstrap import StrictButton
 
 
 class LoginForm(forms.Form):
