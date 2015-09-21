@@ -1,9 +1,9 @@
-<html>
-<head>
-<title>Hello World</title>
-</head>
+{% extends "nav.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load tz %}
+{% block head_title %}{% trans "Welcome to Orbach" %}{% endblock %}
 
-<body>
-<h1>Hello World</h1>
-</body>
-</html>
+{% block content %}
+<p>Hello world</p>
+{% endblock %}

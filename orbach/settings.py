@@ -32,6 +32,7 @@ import tempfile
 from io import StringIO
 
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.messages import constants as messages
 from django.utils.translation import ugettext_lazy as _
 
 from orbach.config import Config
@@ -212,6 +213,10 @@ PIPELINE_JS = {
         'source_filenames': ['patternfly/dist/js/patternfly.min.js'],
         'output_filename': 'patternfly.min.js',
     },
+    'orbach': {
+        'source_filenames': ['orbach.js'],
+        'output_filename': 'orbach.js',
+    },
 }
 
 STATICFILES_DIRS = (
@@ -314,4 +319,12 @@ LOGGING = {
             'level': ORBACH['log_level'],
         }
     }
+}
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
 }

@@ -16,8 +16,25 @@
   {% javascript 'jquery' %}
   {% javascript 'bootstrap' %}
   {% javascript 'patternfly' %}
+  {% javascript 'orbach' %}
 </head>
 <body>
+{% block nav %}{% endblock %}
+{% block flash %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="flash alert {% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
+        {% if "alert-dismissible" in message.tags %}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        {% endif %}
+
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endblock %}
 {% block content %}{% endblock %}
 </body>
 </html>

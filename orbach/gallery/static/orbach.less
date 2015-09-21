@@ -8,14 +8,105 @@
 @import (reference) "@{pf}/fonts.less";
 
 /* Bootstrap */
-@import (reference) "@{pf-components}/bootstrap/less/bootstrap.less";
+@bs-path: "@{pf-components}/bootstrap/less";
+@import (reference) "@{bs-path}/variables.less";
+@import (reference) "@{pf}/variables.less";
+
+// Bootstrap & Patternfly variable overrides
+// NOTE: *any* less class using an overridden variable must be imported fully (not as a reference)
+@navbar-default-color:     #cfcfcf;
+@navbar-default-bg:     #030303;
+@navbar-default-border: darken(@navbar-default-bg, 6.5%);
+
+@navbar-default-link-color: #999;
+
+@navbar-default-link-hover-color:     lighten(@navbar-default-link-color, 20%);
+@navbar-default-link-hover-bg:         transparent;
+
+@navbar-default-link-active-color:     darken(@navbar-default-link-color, 30%);
+@navbar-default-link-active-bg:     darken(@navbar-default-bg, 6.5%);
+
+@navbar-default-link-disabled-color:     #ccc;
+@navbar-default-link-disabled-bg:         transparent;
+
+// Navbar brand label
+@navbar-default-brand-color:        @navbar-default-link-color;
+@navbar-default-brand-hover-color:     @navbar-default-link-hover-color;
+@navbar-default-brand-hover-bg:     @navbar-default-link-hover-bg;
+
+@alert-padding:               15px;
+@alert-border-radius:         @border-radius-base;
+@alert-link-font-weight:      bold;
+
+@alert-success-bg:            @state-success-bg;
+@alert-success-text:          @state-success-text;
+@alert-success-border:        @state-success-border;
+
+@alert-info-bg:               @state-info-bg;
+@alert-info-text:             @state-info-text;
+@alert-info-border:           @state-info-border;
+
+@alert-warning-bg:            @state-warning-bg;
+@alert-warning-text:          @state-warning-text;
+@alert-warning-border:        @state-warning-border;
+
+@alert-danger-bg:             @state-danger-bg;
+@alert-danger-text:           @state-danger-text;
+@alert-danger-border:         @state-danger-border;
+
+@import (reference) "@{bs-path}/mixins.less";
+
+// Reset and dependencies
+@import (reference) "@{bs-path}/normalize.less";
+@import (reference) "@{bs-path}/print.less";
+@import (reference) "@{bs-path}/glyphicons.less";
+
+// Core CSS
+@import (reference) "@{bs-path}/scaffolding.less";
+@import (reference) "@{bs-path}/type.less";
+@import (reference) "@{bs-path}/code.less";
+@import (reference) "@{bs-path}/grid.less";
+@import (reference) "@{bs-path}/tables.less";
+@import (reference) "@{bs-path}/forms.less";
+@import (reference) "@{bs-path}/buttons.less";
+
+// Components
+@import (reference) "@{bs-path}/component-animations.less";
+@import (reference) "@{bs-path}/dropdowns.less";
+@import (reference) "@{bs-path}/button-groups.less";
+@import (reference) "@{bs-path}/input-groups.less";
+@import (reference) "@{bs-path}/navs.less";
+@import "@{bs-path}/navbar.less";
+@import (reference) "@{bs-path}/breadcrumbs.less";
+@import (reference) "@{bs-path}/pagination.less";
+@import (reference) "@{bs-path}/pager.less";
+@import (reference) "@{bs-path}/labels.less";
+@import (reference) "@{bs-path}/badges.less";
+@import (reference) "@{bs-path}/jumbotron.less";
+@import (reference) "@{bs-path}/thumbnails.less";
+@import "@{bs-path}/alerts.less";
+@import (reference) "@{bs-path}/progress-bars.less";
+@import (reference) "@{bs-path}/media.less";
+@import (reference) "@{bs-path}/list-group.less";
+@import (reference) "@{bs-path}/panels.less";
+@import (reference) "@{bs-path}/responsive-embed.less";
+@import (reference) "@{bs-path}/wells.less";
+@import (reference) "@{bs-path}/close.less";
+
+// Components w/ JavaScript
+@import (reference) "@{bs-path}/modals.less";
+@import (reference) "@{bs-path}/tooltip.less";
+@import (reference) "@{bs-path}/popovers.less";
+@import (reference) "@{bs-path}/carousel.less";
+
+// Utility classes
+@import (reference) "@{bs-path}/utilities.less";
+@import (reference) "@{bs-path}/responsive-utilities.less";
 
 /* Font Awesome */
 @import (reference) "@{pf-components}/font-awesome/less/font-awesome.less";
 
-@import (reference) "@{pf}/variables.less";
 @import (reference) "@{pf}/mixins.less";
-@import (reference) "@{pf}/alerts.less";
 @import (reference) "@{pf}/badges.less";
 @import (reference) "@{pf}/breadcrumbs.less";
 @import (reference) "@{pf}/buttons.less";
@@ -33,8 +124,8 @@
 @import (reference) "@{pf}/tabs.less";
 @import (reference) "@{pf}/tooltip.less";
 @import (reference) "@{pf}/type.less";
-
 @import (reference) "@{pf}/icons.less";
+
 
 span.welcome-logo {
     font-size: 75px;
@@ -46,4 +137,16 @@ span.welcome-logo {
 
 form#login_form .alert ul li {
     list-style-type: none;
+}
+
+#orbach-navbar {
+    font-size: @font-size-large;
+    .navbar-brand {
+        .navbar-vertical-align(50px);
+    }
+}
+
+div.flash {
+    width: 85%;
+    .center-block();
 }

@@ -19,7 +19,6 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 from selenium import webdriver
 
 from django.core.urlresolvers import reverse
-#from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import LiveServerTestCase
 
 from django.test import override_settings

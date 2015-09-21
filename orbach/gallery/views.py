@@ -18,9 +18,11 @@ along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import logging
 
-from django.contrib import auth
+from django.contrib import auth, messages
+from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.utils.translation import ugettext as _
 
 from orbach.gallery import msg
 from orbach.gallery.forms import LoginForm
@@ -44,6 +46,13 @@ def lost_username(request):
 def lost_password(request):
     # FIXME
     return render(request, "index.html", {})
+
+
+def logout(request):
+    response = auth.views.logout(request, reverse('gallery:home'))
+    log.info("Logged out!")
+    messages.success(request, _('You are now logged out'), "alert-dismissible flash-fade-out")
+    return response
 
 
 def login(request):

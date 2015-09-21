@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block nav %}
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#orbach-navbar">
+      <span class="sr-only">{% trans "Toggle navigation" %}</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="">
+      <span id="badge" class="fa fa-camera-retro nav-logo"></span>
+    </a>
+  </div>
+
+  <div id="orbach-navbar" class="collapse navbar-collapse">
+    <ul class="nav navbar-nav">
+      <li><a href="#">{% trans "Home" %}</a>
+      <li><a href="#">{% trans "Galleries" %}</a></li>
+    </ul>
+    <form id="search" class="navbar-form navbar-nav" role="search">
+      <div class="input-group">
+        <input type="text" id="st-search-input" class="form-control st-search-input" placeholder="{% trans 'Search...' %}"/>
+        <div class="input-group-btn">
+          <button class="btn btn-default" type="submit"><span class="fa fa-search"></span></button>
+        </div>
+      </div>
+    </form>
+
+    <div class="navbar-right">
+      {% if request.user.is_authenticated %}
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a id="nav-username" href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <span class="pficon pficon-user"></span>
+            {{ request.user.first_name }}<b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="#">{% trans "Profile" %}</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="{% url 'gallery:logout' %}">{% trans "Log out" %}</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      {% else %}
+      <ul class="nav navbar-nav">
+        <li><a href="{% url 'gallery:login' %}">{% trans "Log in" %}</a></li>
+      </ul>
+      {% endif %}
+    </div> <!-- navbar-right -->
+  </div> <!-- navbar-collapse -->
+  </div> <!-- container-fluid -->
+</nav>
+{% endblock %}
