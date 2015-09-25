@@ -41,7 +41,7 @@ class LoginForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        super(LoginForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'login_form'
         self.helper.form_method = 'post'
@@ -74,3 +74,13 @@ class LoginForm(forms.Form):
                 css_class="form-group",
             )
         )
+
+
+class AddPhotosForm(forms.Form):
+    file = forms.FileField(
+        label=_('File'),
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
