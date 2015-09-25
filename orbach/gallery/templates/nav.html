@@ -1,38 +1,23 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load staticfiles %}
 
 {% block nav %}
-<nav class="navbar navbar-default" role="navigation">
-  <div class="container-fluid">
+<nav class="navbar navbar-default navbar-pf" role="navigation">
   <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#orbach-navbar">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".orbach-navbar">
       <span class="sr-only">{% trans "Toggle navigation" %}</span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="">
-      <span id="badge" class="fa fa-camera-retro nav-logo"></span>
+    <a class="navbar-brand" href="{% url 'gallery:home' %}">
+      <img src="{% static 'img/orbach-brand.png' %}" alt="Orbach"/>
     </a>
   </div>
-
-  <div id="orbach-navbar" class="collapse navbar-collapse">
-    <ul class="nav navbar-nav">
-      <li><a href="#">{% trans "Home" %}</a>
-      <li><a href="#">{% trans "Galleries" %}</a></li>
-    </ul>
-    <form id="search" class="navbar-form navbar-nav" role="search">
-      <div class="input-group">
-        <input type="text" id="st-search-input" class="form-control st-search-input" placeholder="{% trans 'Search...' %}"/>
-        <div class="input-group-btn">
-          <button class="btn btn-default" type="submit"><span class="fa fa-search"></span></button>
-        </div>
-      </div>
-    </form>
-
-    <div class="navbar-right">
+  <div class="collapse navbar-collapse orbach-navbar">
+    <ul class="nav navbar-nav navbar-utility">
       {% if request.user.is_authenticated %}
-      <ul class="nav navbar-nav">
         <li class="dropdown">
           <a id="nav-username" href="#" class="dropdown-toggle" data-toggle="dropdown">
             <span class="pficon pficon-user"></span>
@@ -48,14 +33,32 @@
             </li>
           </ul>
         </li>
-      </ul>
       {% else %}
-      <ul class="nav navbar-nav">
         <li><a href="{% url 'gallery:login' %}">{% trans "Log in" %}</a></li>
-      </ul>
       {% endif %}
-    </div> <!-- navbar-right -->
+    </ul>
+    <div class="nav navbar-primary">
+      <ul class="nav navbar-nav">
+        <li><a href="#">{% trans "Galleries" %}</a></li>
+        {% if request.user.is_authenticated %}
+          <li><a href="{% url 'gallery:manage_photos' %}">{% trans "Photo Management" %}</a></li>
+        {% endif %}
+      </ul>
+      <div class="nav navbar-form navbar-right">
+        <form id="orbach-search" role="form" class="search-pf has-button">
+          <div class="form-group has-clear">
+            <div class="search-pf-input-group">
+              <label for="search1" class="sr-only">Search</label>
+              <input id="search1" type="search" class="form-control" placeholder="{% trans 'Search...' %}">
+              <button type="button" class="clear" aria-hidden="true"><span class="pficon pficon-close"></span></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-default" type="submit"><span class="fa fa-search"></span></button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div> <!-- navbar-collapse -->
-  </div> <!-- container-fluid -->
 </nav>
 {% endblock %}

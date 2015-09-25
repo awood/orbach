@@ -76,7 +76,7 @@
 @import (reference) "@{bs-path}/button-groups.less";
 @import (reference) "@{bs-path}/input-groups.less";
 @import (reference) "@{bs-path}/navs.less";
-@import "@{bs-path}/navbar.less";
+@import (reference) "@{bs-path}/navbar.less";
 @import (reference) "@{bs-path}/breadcrumbs.less";
 @import (reference) "@{bs-path}/pagination.less";
 @import (reference) "@{bs-path}/pager.less";
@@ -112,9 +112,11 @@
 @import (reference) "@{pf}/buttons.less";
 @import (reference) "@{pf}/dropdowns.less";
 @import (reference) "@{pf}/forms.less";
+@import (reference) "@{pf}/icons.less";
 @import (reference) "@{pf}/labels.less";
 @import (reference) "@{pf}/list-group.less";
 @import (reference) "@{pf}/modals.less";
+@import (reference) "@{pf}/navbar.less";
 @import (reference) "@{pf}/pager.less";
 @import (reference) "@{pf}/pagination.less";
 @import (reference) "@{pf}/panels.less";
@@ -124,7 +126,6 @@
 @import (reference) "@{pf}/tabs.less";
 @import (reference) "@{pf}/tooltip.less";
 @import (reference) "@{pf}/type.less";
-@import (reference) "@{pf}/icons.less";
 
 
 span.welcome-logo {
@@ -139,10 +140,9 @@ form#login_form .alert ul li {
     list-style-type: none;
 }
 
-#orbach-navbar {
-    font-size: @font-size-large;
-    .navbar-brand {
-        .navbar-vertical-align(50px);
+@media (min-width: @screen-lg-min) {
+    .orbach-navbar #orbach-search {
+        padding-right: 10px;
     }
 }
 
