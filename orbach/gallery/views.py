@@ -48,10 +48,6 @@ def lost_password(request):
     return render(request, "index.html", {})
 
 
-def manage_photos(request):
-    return render(request, 'manage_photos.html')
-
-
 def logout(request):
     response = auth.views.logout(request, reverse('gallery:home'))
     log.info("Logged out!")

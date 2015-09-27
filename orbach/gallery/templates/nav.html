@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load staticfiles %}
+{% load extra_filters %}
 
 {% block nav %}
 <nav class="navbar navbar-default navbar-pf" role="navigation">
@@ -41,7 +42,30 @@
       <ul class="nav navbar-nav">
         <li><a href="#">{% trans "Galleries" %}</a></li>
         {% if request.user.is_authenticated %}
-          <li><a href="{% url 'gallery:manage_photos' %}">{% trans "Photo Management" %}</a></li>
+          <li class="dropdown {% if request.path|startswith:'/gallery/actions' %}active{% endif %}">
+            <a id="nav-manage-photos" href="#" class="dropdown-toggle" data-toggle="dropdown">
+              {% trans "Actions" %}<b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="dropdown-submenu">
+                <a href="#">{% trans "Photos" %}</a>
+                  <ul class="dropdown-menu">
+                    <li><a href="{% url 'gallery:upload_photos' %}">{% trans "Upload" %}</a></li>
+                    <li><a href="{% url 'gallery:modify_photos' %}">{% trans "Modify" %}</a></li>
+                    <li><a href="{% url 'gallery:delete_photos' %}">{% trans "Delete" %}</a></li>
+                  </ul>
+               </li>
+              <li class="divider"></li>
+              <li class="dropdown-submenu">
+                <a href="#">{% trans "Galleries" %}</a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">{% trans "Create" %}</a></li>
+                    <li><a href="#">{% trans "Modify" %}</a></li>
+                    <li><a href="#">{% trans "Delete" %}</a></li>
+                  </ul>
+              </li>
+            </ul>
+          </li>
         {% endif %}
       </ul>
       <div class="nav navbar-form navbar-right">

@@ -16,9 +16,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Orbach.  If not, see <http://www.gnu.org/licenses/>.
 '''
-from django.conf.urls import url
+from django.conf.urls import url, include
 
 from orbach.gallery import views as v
+from orbach.gallery import action_views as action
+
+
+action_patterns = [
+    url(r'^upload_photos.html$', action.upload_photos, name="upload_photos"),
+    url(r'^modify_photos.html$', action.modify_photos, name="modify_photos"),
+    url(r'^delete_photos.html$', action.delete_photos, name="delete_photos"),
+    url(r'^create_galleries.html$', action.create_galleries, name="create_galleries"),
+    url(r'^modify_galleries.html$', action.modify_galleries, name="modify_galleries"),
+    url(r'^delete_galleries.html$', action.delete_galleries, name="delete_galleries"),
+]
 
 urlpatterns = [
     url(r'^$', v.home),
@@ -28,5 +39,5 @@ urlpatterns = [
     url(r'^(?P<filename>(robots.txt))$', v.text_file, name='text_file'),
     url(r'^lost_username.html$', v.lost_username, name='lost_username'),
     url(r'^lost_password.html$', v.lost_password, name='lost_password'),
-    url(r'^manage_photos.html$', v.manage_photos, name='manage_photos'),
+    url(r'^actions/', include(action_patterns)),
 ]
