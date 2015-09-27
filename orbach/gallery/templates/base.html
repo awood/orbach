@@ -12,11 +12,13 @@
   {% stylesheet 'patternfly' %}
   {% stylesheet 'patternfly-additional' %}
   {% stylesheet 'orbach' %}
+  {% block extra_css_assets %}{% endblock %}
 
   {% javascript 'jquery' %}
   {% javascript 'bootstrap' %}
   {% javascript 'patternfly' %}
   {% javascript 'orbach' %}
+  {% block extra_js_assets %}{% endblock %}
 </head>
 <body>
 {% block nav %}{% endblock %}

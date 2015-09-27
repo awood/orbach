@@ -23,7 +23,7 @@ from django.forms import widgets
 from django.utils.translation import ugettext as _
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, HTML, Submit
+from crispy_forms.layout import Layout, Div, HTML, Submit, Field
 
 
 class LoginForm(forms.Form):
@@ -76,7 +76,7 @@ class LoginForm(forms.Form):
         )
 
 
-class AddPhotosForm(forms.Form):
+class UploadPhotosForm(forms.Form):
     file = forms.FileField(
         label=_('File'),
         required=True,
@@ -84,3 +84,15 @@ class AddPhotosForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+
+        self.helper.form_id = 'upload_form'
+        self.helper.form_class = 'form-horizontal'
+
+        self.helper.field_class = 'col-md-6'
+        self.helper.label_class = 'col-md-2'
+
+        self.helper.layout = Layout(
+            'file'
+        )

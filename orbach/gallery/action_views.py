@@ -22,14 +22,21 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 
+from orbach.gallery.forms import UploadPhotosForm
+
 
 def upload_photos(request):
-
     nav = {
         'active': 'upload_photos',
         'section': 'photos',
     }
-    return render(request, 'actions/upload_photos.html', {'nav': nav})
+    if request.method == 'POST':
+        form = UploadPhotosForm(request.POST)
+        if form.is_valid():
+            pass
+    else:
+        form = UploadPhotosForm
+    return render(request, 'actions/upload_photos.html', {'nav': nav, 'form': form})
 
 
 def modify_photos(request):

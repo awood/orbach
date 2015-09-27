@@ -2,8 +2,76 @@
 {% load i18n %}
 {% load l10n %}
 {% load tz %}
+{% load pipeline %}
+
 {% block head_title %}{% trans "Upload Photos" %}{% endblock %}
 
+{% block extra_css_assets %}
+  {% stylesheet 'fileupload' %}
+{% endblock %}
+
+{% block extra_js_assets %}
+  {% javascript 'fileupload' %}
+{% endblock %}
+
 {% block workspace %}
-<p>{% trans "Upload Photos" %}</p>
+<h1>{% trans "Upload Photos" %}</h1>
+
+<form id="fileupload" method="POST" enctype="multipart/form-data" action="{% url 'gallery:upload_photos' %}">
+  {% csrf_token %}
+  <span class="btn btn-success fileinput-button">
+    <span class="fa fa-plus"></span>
+    <span>{% trans 'Add Files' %}</span>
+    <input type="file" name="files[]" multiple>
+  </span>
+
+  <button type="submit" id="fileupload-submit" class="btn btn-primary start">
+    <span class="fa fa-cloud-upload"></span>
+    <span>{% trans 'Start Upload' %}</span>
+  </button>
+
+  <!-- The table listing the files available for upload/download -->
+  <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+
+  <div class="progress hidden">
+    <div id="upload_progress" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"">
+      <span id="upload_label">50%</span>
+    </div>
+  </div>
+</form>
+
+<script>
+$(function () {
+    $('#fileupload').fileupload({
+        url: "{% url 'gallery:upload_photos' %}",
+        autoUpload: false,
+        dataType: 'json',
+        done: function (e, data) {
+          $.each(data.result.files, function (index, file) {
+            $('<p/>').text(file.name).appendTo(document.body);
+          });
+        },
+        start: function (e, data) {
+          $('#upload_progress').removeClass('hidden');
+        },
+        progressall: function (e, data) {
+          var progress = parseInt(data.loaded / data.total * 100, 10);
+          $('#upload_progress').css(
+            'width',
+            progress + '%'
+          );
+          $('#upload_progress').attr('aria-valuenow', progress);
+          $('#upload_label').text(progress + '%');
+        },
+        add: function (e, data) {
+          data.context = $('#fileupload-submit')
+            .click(function () {
+              data.context = $('<p/>').text('Uploading...').replaceAll($(this));
+                data.submit();
+          });
+        }
+    });
+});
+</script>
+
 {% endblock %}

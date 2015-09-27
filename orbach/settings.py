@@ -194,6 +194,10 @@ PIPELINE_CSS = {
         'source_filenames': ['patternfly/dist/css/patternfly-additions.min.css'],
         'output_filename': 'patternfly-additional.min.css',
     },
+    'fileupload': {
+        'source_filenames': ['blueimp-file-upload/css/jquery.fileupload.css'],
+        'output_filename': 'fileupload.css',
+    },
     'orbach': {
         'source_filenames': ['orbach.less'],
         'output_filename': 'orbach.css',
@@ -212,6 +216,15 @@ PIPELINE_JS = {
     'patternfly': {
         'source_filenames': ['patternfly/dist/js/patternfly.min.js'],
         'output_filename': 'patternfly.min.js',
+    },
+    'fileupload': {
+        'source_filenames': [
+            'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
+            'blueimp-file-upload/js/jquery.iframe-transport.js',
+            'blueimp-file-upload/js/jquery.fileupload.js',
+        ],
+        'output_filename': 'file_upload.js',
+
     },
     'orbach': {
         'source_filenames': ['orbach.js'],
