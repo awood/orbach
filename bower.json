@@ -3,6 +3,7 @@
     "private": true,
     "dependencies": {
         "patternfly": "~2.2.0",
-        "galleria": "~1.4.0"
+        "galleria": "~1.4.0",
+        "blueimp-file-upload": "~9.11.2"
     }
 }
