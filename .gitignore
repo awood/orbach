@@ -25,6 +25,8 @@ test_deploy
 **/static/**/AUTHORS*
 **/static/**/CONTRIBUTING*
 
+**/jquery/src/**
+
 **/patternfly/*.txt
 **/patternfly/**/test*
 **/patternfly/**/example*
