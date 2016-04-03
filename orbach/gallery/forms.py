@@ -23,7 +23,12 @@ from django.forms import widgets
 from django.utils.translation import ugettext as _
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, HTML, Submit, Field
+from crispy_forms.layout import Layout, Div, HTML, Submit
+
+from orbach.core import models
+
+import zipfile
+from zipfile import BadZipFile
 
 
 class LoginForm(forms.Form):
@@ -76,23 +81,37 @@ class LoginForm(forms.Form):
         )
 
 
-class UploadPhotosForm(forms.Form):
-    file = forms.FileField(
-        label=_('File'),
-        required=True,
-    )
+class ArchiveFileForm(forms.Form):
+    file = forms.FileField()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
+    def __init__(self, owner, *args, **kwargs):
+        self.owner = owner
+        return super().__init__(*args, **kwargs)
 
-        self.helper.form_id = 'upload_form'
-        self.helper.form_class = 'form-horizontal'
+    def clean_file(self):
+        f = self.cleaned_data.get('file', '')
+        if f:
+            with zipfile.ZipFile(f) as z:
+                try:
+                    z.testzip()
+                except BadZipFile:
+                    raise forms.ValidationError(_("Corrupt ZIP file"))
+        return f
 
-        self.helper.field_class = 'col-md-6'
-        self.helper.label_class = 'col-md-2'
 
-        self.helper.layout = Layout(
-            'file'
-        )
+class ImageFileForm(forms.ModelForm):
+    class Meta:
+        model = models.ImageFile
+        fields = ["file"]
+
+    def __init__(self, owner, *args, **kwargs):
+        self.owner = owner
+        return super().__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # Save without committing, set the owner, then commit.
+        kwargs['commit'] = False
+        obj = super().save(*args, **kwargs)
+        obj.owner = self.owner
+        obj.save()
+        return obj

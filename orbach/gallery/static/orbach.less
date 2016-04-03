@@ -14,25 +14,26 @@
 
 // Bootstrap & Patternfly variable overrides
 // NOTE: *any* less class using an overridden variable must be imported fully (not as a reference)
-@navbar-default-color:     #cfcfcf;
-@navbar-default-bg:     #030303;
+@navbar-default-color: #cfcfcf;
+@navbar-default-bg: #030303;
 @navbar-default-border: darken(@navbar-default-bg, 6.5%);
+@navbar-pf-border-color: darken(@navbar-default-bg, 6.5%);
 
 @navbar-default-link-color: #999;
 
-@navbar-default-link-hover-color:     lighten(@navbar-default-link-color, 20%);
-@navbar-default-link-hover-bg:         transparent;
+@navbar-default-link-hover-color: lighten(@navbar-default-link-color, 20%);
+@navbar-default-link-hover-bg: transparent;
 
-@navbar-default-link-active-color:     darken(@navbar-default-link-color, 30%);
-@navbar-default-link-active-bg:     darken(@navbar-default-bg, 6.5%);
+@navbar-default-link-active-color: darken(@navbar-default-link-color, 30%);
+@navbar-default-link-active-bg: darken(@navbar-default-bg, 6.5%);
 
-@navbar-default-link-disabled-color:     #ccc;
-@navbar-default-link-disabled-bg:         transparent;
+@navbar-default-link-disabled-color: #ccc;
+@navbar-default-link-disabled-bg: transparent;
 
 // Navbar brand label
-@navbar-default-brand-color:        @navbar-default-link-color;
-@navbar-default-brand-hover-color:     @navbar-default-link-hover-color;
-@navbar-default-brand-hover-bg:     @navbar-default-link-hover-bg;
+@navbar-default-brand-color: @navbar-default-link-color;
+@navbar-default-brand-hover-color: @navbar-default-link-hover-color;
+@navbar-default-brand-hover-bg: @navbar-default-link-hover-bg;
 
 @alert-padding:               15px;
 @alert-border-radius:         @border-radius-base;
@@ -76,7 +77,7 @@
 @import (reference) "@{bs-path}/button-groups.less";
 @import (reference) "@{bs-path}/input-groups.less";
 @import (reference) "@{bs-path}/navs.less";
-@import (reference) "@{bs-path}/navbar.less";
+@import "@{bs-path}/navbar.less";
 @import (reference) "@{bs-path}/breadcrumbs.less";
 @import (reference) "@{bs-path}/pagination.less";
 @import (reference) "@{bs-path}/pager.less";
@@ -154,4 +155,8 @@ div.flash {
 .navbar-primary .navbar-form {
     margin-top: 8px;
     margin-bottom: 8px;
+}
+
+.success-fa {
+    color: @state-success-text;
 }

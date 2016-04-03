@@ -19,59 +19,127 @@
 
 <form id="fileupload" method="POST" enctype="multipart/form-data" action="{% url 'gallery:upload_photos' %}">
   {% csrf_token %}
-  <span class="btn btn-success fileinput-button">
-    <span class="fa fa-plus"></span>
-    <span>{% trans 'Add Files' %}</span>
-    <input type="file" name="files[]" multiple>
-  </span>
-
-  <button type="submit" id="fileupload-submit" class="btn btn-primary start">
-    <span class="fa fa-cloud-upload"></span>
-    <span>{% trans 'Start Upload' %}</span>
-  </button>
-
-  <!-- The table listing the files available for upload/download -->
-  <table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
-
-  <div class="progress hidden">
-    <div id="upload_progress" class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"">
-      <span id="upload_label">50%</span>
+  <div class="fileupload-buttonbar">
+    <div>
+      <span class="btn btn-success btn-lg fileinput-button">
+        <span class="fa fa-plus"></span>
+        <span>{% trans 'Add Files' %}</span>
+        <input type="file" name="file" multiple>
+      </span>
+      <button type="submit" class="btn btn-primary btn-lg start">
+        <span class="fa fa-upload"></span>
+        <span>{% trans 'Start Upload' %}</span>
+      </button>
+      <button type="reset" class="btn btn-warning btn-lg cancel">
+        <span class="fa fa-ban"></span>
+        <span>{% trans 'Cancel Upload' %}</span>
+      </button>
+      <button type="button" class="btn btn-danger btn-lg delete">
+        <span class="fa fa-trash"></span>
+        <span>{% trans 'Reset' %}</span>
+      </button>
+      <!-- The global file processing state -->
+      <span class="fileupload-process"></span>
+    </div>
+    <!-- The global progress state -->
+    <div class="fileupload-progress fade">
+      <!-- The global progress bar -->
+      <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+      </div>
+      <!-- The extended global progress state -->
+      <div class="progress-extended">&nbsp;</div>
     </div>
   </div>
+  <div class="files container"></div>
 </form>
 
-<script>
-$(function () {
-    $('#fileupload').fileupload({
-        url: "{% url 'gallery:upload_photos' %}",
-        autoUpload: false,
-        dataType: 'json',
-        done: function (e, data) {
-          $.each(data.result.files, function (index, file) {
-            $('<p/>').text(file.name).appendTo(document.body);
-          });
-        },
-        start: function (e, data) {
-          $('#upload_progress').removeClass('hidden');
-        },
-        progressall: function (e, data) {
-          var progress = parseInt(data.loaded / data.total * 100, 10);
-          $('#upload_progress').css(
-            'width',
-            progress + '%'
-          );
-          $('#upload_progress').attr('aria-valuenow', progress);
-          $('#upload_label').text(progress + '%');
-        },
-        add: function (e, data) {
-          data.context = $('#fileupload-submit')
-            .click(function () {
-              data.context = $('<p/>').text('Uploading...').replaceAll($(this));
-                data.submit();
-          });
-        }
-    });
-});
+{% verbatim %}
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+  <div class="template-upload row">
+    <div class="col-md-2">
+      <span class="preview"></span>
+    </div>
+    <div class="col-md-2">
+      <p class="name">{%=file.name%}</p>
+      <strong class="error text-danger"></strong>
+    </div>
+    <div class="col-md-3">
+      <p class="size"></p>
+      <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-bar progress-bar-success" style="width:0%;"></div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      {% if (!i && !o.options.autoUpload) { %}
+        <button class="btn btn-primary btn-lg start" disabled>
+          <span class="fa fa-upload fa-lg"></span>
+        </button>
+      {% } %}
+      {% if (!i) { %}
+        <button class="btn btn-warning btn-lg cancel">
+          <span class="fa fa-ban fa-lg"></span>
+        </button>
+      {% } %}
+    </div>
+  </div>
+{% } %}
 </script>
 
+<!-- The template to display after upload completes -->
+<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+  <div class="template-download row">
+    <div class="col-md-2">
+      <span class="preview">
+        {% if (file.thumbnailUrl) { %}
+          <img src="{%=file.thumbnailUrl%}"/>
+        {% } %}
+      </span>
+    </div>
+    <div class="col-md-2">
+      <p class="name">
+        <ul>
+        {% for (var j=0; j < file.name.length; j++) { %}
+        <li>{%=file.name[j]%}</li>
+        {% } %}
+        </ul>
+      </p>
+    </div>
+    <div class="col-md-3">
+      <span class="size">{%=o.formatFileSize(file.size)%}</span>
+    </div class="col-md-5">
+    <div>
+      {% if (file.error) { %}
+        <div><span class="label label-danger">Error</span> {%=file.error%}</div>
+      {% } else { %}
+        <span class="fa fa-check fa-lg success-fa" ></span>
+      {% } %}
+    </div>
+  </div>
+{% } %}
+</script>
+{% endverbatim %}
+
+<script>
+  $(function() {
+    'use strict';
+
+    $('#fileupload').fileupload({
+      url: "{% url 'gallery:upload_photos' %}",
+      dataType : 'json',
+      autoUpload: false,
+      acceptFileTypes : /(\.|\/)(gif|jpe?g|png|zip)$/i,
+      previewMaxWidth: 120,
+      previewMaxHeight: 120,
+      archivePreviewClasses: ['fa', 'fa-archive', 'fa-3x'],
+      // Enable image resizing, except for Android and Opera,
+      // which actually support image resizing, but fail to
+      // send Blob objects via XHR requests:
+      disableImageResize : /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent)
+    });
+  });
+</script>
 {% endblock %}

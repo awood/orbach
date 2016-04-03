@@ -51,6 +51,11 @@ class ImageFile(BaseModel):
     def __str__(self):
         return self.file.name
 
+    @classmethod
+    def create(cls, file, owner):
+        image = cls(file=file, owner=owner)
+        return image
+
     class Meta:
         db_table = "ob_image_files"
         permissions = (
@@ -60,7 +65,7 @@ class ImageFile(BaseModel):
 
 @receiver(pre_delete, sender=ImageFile)
 def imagefile_delete(sender, instance, **kwargs):
-    # Set save to False to instance doesn't try to save the object
+    # Set save to False so instance doesn't try to save the object
     instance.file.delete(save=False)
 
 

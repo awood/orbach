@@ -1,2 +1,4 @@
 * Lost password page
 * Lost username page
+* Reset button on file upload page
+

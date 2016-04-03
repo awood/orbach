@@ -220,8 +220,16 @@ PIPELINE_JS = {
     'fileupload': {
         'source_filenames': [
             'blueimp-file-upload/js/vendor/jquery.ui.widget.js',
+            'blueimp-tmpl/js/tmpl.min.js',
+            'blueimp-load-image/js/load-image.all.min.js',
+            'blueimp-canvas-to-blob/js/canvas-to-blob.min.js',
             'blueimp-file-upload/js/jquery.iframe-transport.js',
             'blueimp-file-upload/js/jquery.fileupload.js',
+            'blueimp-file-upload/js/jquery.fileupload-process.js',
+            'blueimp-file-upload/js/jquery.fileupload-image.js',
+            'jquery.fileupload-archive.js',
+            'blueimp-file-upload/js/jquery.fileupload-validate.js',
+            'blueimp-file-upload/js/jquery.fileupload-ui.js',
         ],
         'output_filename': 'file_upload.js',
 
