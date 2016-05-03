@@ -70,10 +70,10 @@ def upload_photos(request):
                 return HttpResponseBadRequest(_('Must have files attached!'))
 
         result = []
-        for image in images:
+        for image, name in zip(images, names):
             file = image.file
             result.append({
-                "name": names,
+                "name": name,
                 "size": file.size,
                 "url": file.url,
                 "thumbnail_url": file.thumb_url,

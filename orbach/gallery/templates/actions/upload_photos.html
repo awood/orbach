@@ -100,13 +100,7 @@
       </span>
     </div>
     <div class="col-md-2">
-      <p class="name">
-        <ul>
-        {% for (var j=0; j < file.name.length; j++) { %}
-        <li>{%=file.name[j]%}</li>
-        {% } %}
-        </ul>
-      </p>
+      <p class="name">{%=file.name%}</p>
     </div>
     <div class="col-md-3">
       <span class="size">{%=o.formatFileSize(file.size)%}</span>
@@ -138,7 +132,59 @@
       // Enable image resizing, except for Android and Opera,
       // which actually support image resizing, but fail to
       // send Blob objects via XHR requests:
-      disableImageResize : /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent)
+      disableImageResize : /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
+      done: function (e, data) {
+        if (e.isDefaultPrevented()) {
+            return false;
+        }
+        var that = $(this).data('blueimp-fileupload') ||
+                $(this).data('fileupload'),
+            getFilesFromResponse = data.getFilesFromResponse ||
+                that.options.getFilesFromResponse,
+            files = getFilesFromResponse(data),
+            template,
+            deferred;
+        if (data.context) {
+            $.each(data.context, function (index, ctx) {
+                // TODO Need some way to detect an empty result
+                // var file = files[index] || {error: 'Empty file upload result'};
+                deferred = that._addFinishedDeferreds();
+                that._transition($(ctx)).done(
+                    function () {
+                        var node = $(ctx);
+                        /* Since an archive can return more files than there were upload
+                         * elements in the DOM, we override this method to render all the
+                         * files at once instead of locking each item in the return array
+                         * to an existing DOM element. */
+                        template = that._renderDownload(files).replaceAll(node);
+                        that._forceReflow(template);
+                        that._transition(template).done(
+                            function () {
+                                data.context = $(ctx);
+                                that._trigger('completed', e, data);
+                                that._trigger('finished', e, data);
+                                deferred.resolve();
+                            }
+                        );
+                    }
+                );
+            });
+        } else {
+            template = that._renderDownload(files)[
+                that.options.prependFiles ? 'prependTo' : 'appendTo'
+            ](that.options.filesContainer);
+            that._forceReflow(template);
+            deferred = that._addFinishedDeferreds();
+            that._transition(template).done(
+                function () {
+                    data.context = $(this);
+                    that._trigger('completed', e, data);
+                    that._trigger('finished', e, data);
+                    deferred.resolve();
+                }
+            );
+        }
+    },
     });
   });
 </script>
