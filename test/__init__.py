@@ -43,7 +43,7 @@ def temp_file(content, *args, **kwargs):
 def open_mock(content, **kwargs):
     content_out = StringIO()
     m = mock_open(read_data=content)
-    with patch('__main__.open', m, create=True, **kwargs) as mo:
+    with patch('__builtin__.open', m, create=True, **kwargs) as mo:
         stream = StringIO(content)
         rv = mo.return_value
         rv.write = lambda x: content_out.write(bytes(x, "utf-8"))
